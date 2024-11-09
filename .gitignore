@@ -1,0 +1,40 @@
+# # # # Python
+*.py[cod]
+__pycache__/
+
+# # # # Cython
+
+*.o
+*.def
+
+# Sphinx documentation
+docs/_build/
+docs/_static/
+
+# python setup
+build/
+dist/
+Thermca.egg-info
+
+
+# Ipython Notebook
+.ipynb_checkpoints/
+
+# # # # Windows
+
+Thumbs.db
+Desktop.ini
+
+# # # # Mac
+.DS_Store
+
+# # # # Pycharm
+.idea/
+venv/
+
+# # # # Pytest
+.pytest_cache/
+
+# # # # Unknown
+.cache
+

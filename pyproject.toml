@@ -1,0 +1,41 @@
+[project]
+name = "Thermca"
+requires-python = ">=3.10"  # Black also interprets this
+version = "0.9"
+readme = "README.rst"
+authors = [{name = "Steffen Schroeder"}]
+license = {text = "GPL-3", license_file = "LICENSE.rst"}
+classifiers = ["Development Status :: 3 - Alpha"]
+dependencies = [
+    "numpy",
+    'sparse_dot_mkl ; platform_system != "Darwin"',
+    "scipy",
+    "sparse",
+    "matplotlib",
+    "pandas",
+    "jupyterlab",
+    "joblib",
+    "meshio",
+    "scikit-fem",
+    "pyvista[all,trame]",
+    # Test
+    "pytest",
+    # Building documentation
+    "sphinx",
+    "sphinx_rtd_theme",
+    "nbsphinx",
+    # 3D plotting in jupyterlab
+    "ipywidgets",
+    # Tetwild robust meshing
+    "trimesh",
+    "rtree",
+    # Distribution
+    "build",
+]
+
+[tool.setuptools.package-data]
+docs = ["examples/*"]
+
+[tool.black]
+line-length = 88
+skip-string-normalization = true

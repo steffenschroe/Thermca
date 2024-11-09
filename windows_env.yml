@@ -1,0 +1,36 @@
+name: thermca
+
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - "libblas=*=*mkl"
+  - numpy
+  - sparse_dot_mkl
+  - scipy
+  - sparse
+  - matplotlib
+  - pandas
+  - jupyterlab
+  - joblib
+  - meshio
+  # Test
+  - pytest
+  # Building documentation
+  - sphinx
+  - sphinx_rtd_theme
+  - nbsphinx
+  # 3D plotting in jupyterlab
+  - ipywidgets
+  # Tetwild robust meshing
+  - trimesh
+  - rtree
+  # Build
+  - build
+  # Only available on PyPI
+  - pip
+  - pip:
+    - scikit-fem
+    # - 'pyvista[all,trame]'  # Manual as: pip install 'pyvista[all,trame]'
+
