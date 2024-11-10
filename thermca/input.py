@@ -1,7 +1,7 @@
 from bisect import bisect_right
 from dataclasses import dataclass, field
 
-from numpy import ndarray, float64, printoptions, array, asarray, NaN
+from numpy import ndarray, float64, array, asarray, nan
 
 from thermca.baseelements import ModelElement
 
@@ -114,11 +114,12 @@ class Input(ModelElement):
     name: str = ""
     _old_time: float = field(repr=False, default=float("-inf"))
     _old_idx: int = field(repr=False, default=0)
-    _value: ndarray = field(repr=False, default=array(NaN))
+    _value: ndarray = field(repr=False, init=False)
     _time_table: ndarray = field(repr=False, init=False)
 
     def __post_init__(self):
         super().__init__()
+        self._value = array(nan)
         self._time_table = asarray(self.time_table, dtype=float64)
         if not self._time_table.ndim == 2:
             raise TypeError("2d sequence in regular array shape expected.")
