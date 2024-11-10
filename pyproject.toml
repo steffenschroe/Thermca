@@ -29,8 +29,6 @@ dependencies = [
     # Tetwild robust meshing
     "trimesh",
     "rtree",
-    # Distribution
-    "build",
 ]
 
 [tool.setuptools.package-data]
