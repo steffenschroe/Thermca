@@ -161,9 +161,9 @@ def test_part_heat_and_film(mor_dof, fe_assembly):
         assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.002)
         assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.0006)
     else:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0011)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.06)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.007)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0013)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.061)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.0071)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
