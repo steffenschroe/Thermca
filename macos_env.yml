@@ -1,5 +1,4 @@
 name: thermca
-
 channels:
   - conda-forge
   - defaults
@@ -29,4 +28,5 @@ dependencies:
   - pip
   - pip:
     - scikit-fem
-    # - 'pyvista[all,trame]'  # Manual as: pip install 'pyvista[all,trame]'
+    - 'pyvista[all,trame]'  # Manual as: pip install 'pyvista[all,trame]'
+    - git+https://github.com/steffenschroe/Thermca.git

@@ -37,7 +37,8 @@ The analysis is supported by:
 Installation
 ============
 
-Thermca is a python based application and requires python > 3.10.
+Thermca is a python based application and requires python 3.10, 3.11 or
+3.12.
 This project does not make package releases. If you want to install it,
 you'll need to download it from GitHub. Thermca has several
 dependencies. The preferred method is to install all dependencies as a
@@ -52,9 +53,10 @@ environment can be chosen by the -n switch.::
     $ conda env create -f <OS and architecture>_env.lock.yml -n thermca
     $ conda activate thermca
 
-To install Thermca itself, run pip with github address, e.g.::
+To install Thermca itself in the environment, run pip with its github
+address::
 
-    $ pip install https://github.com/steffenschroe/Thermca --no-dependencies
+    $ pip install git+https://github.com/steffenschroe/Thermca.git --no-dependencies
 
 Using SSH.::
 
