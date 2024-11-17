@@ -45,17 +45,20 @@ pretested Conda virtual environment. Therefore, you need to install the
 Anaconda distribution or an lightweight
 `Miniconda <https://docs.conda.io/projects/miniconda/en/latest/>`_
 variant. The environment information for Thermca is stored in operating
-system dependent *.lock.YML files. They can be found in the source root
-directory. The name of the environment can be chosen by the -n switch.::
+system dependent <operating system and architecture>.lock.YML files.
+They can be found in the source root directory. The name of the
+environment can be chosen by the -n switch.::
 
-    $ conda env create -f *_env.lock.yml -n thermca
+    $ conda env create -f <OS and architecture>_env.lock.yml -n thermca
     $ conda activate thermca
 
-To install Thermca itself, run pip with the source distribution file,
-e.g.::
+To install Thermca itself, run pip with github address, e.g.::
 
-    $ pip install Thermca-X.X.X.tar.gz
+    $ pip install https://github.com/steffenschroe/Thermca --no-dependencies
 
+Using SSH.::
+
+    $ pip install git+ssh://git@github.com/steffenschroe/Thermca --no-dependencies
 
 Package information
 -------------------
@@ -84,13 +87,18 @@ Optionally, to speed up the simulation of FE-based models, the sparse
 routines of the Intel Math Kernel Library (MKL) can be used. This
 library is sometimes the default implementation of BLAS and LAPACK
 routines used by Numpy and Scipy. It is available for Linux x86, MacOS
-x86 on Intel processors and Windows x86. Sometimes is has to be chosen
-during the installation of Numpy::
+x86 on Intel processors and Windows x86. The Conda package manager
+supports to choose the implementation of BLAS and LAPACK routines during
+the installation of Numpy::
 
     $ conda install conda-forge::numpy "libblas=*=*mkl"
 
-To get access to the MKL sparse routines the following package has to
-be installed:
+For Apple processors, the Accelerate framework is available::
+
+    $ conda install conda-forge::numpy "libblas=*=*accelerate"
+
+To get access to the MKL sparse routines on Intel processors the
+following package has to be installed:
 
 * sparse_dot_mkl
 
@@ -111,10 +119,6 @@ To build the documentation the following packages have to be installed:
 * sphinx
 * sphinx_rtd_theme
 * nbsphinx
-
-To build a source distribution:
-
-* build
 
 Author
 ======
@@ -172,14 +176,10 @@ Developer Information
 To install Thermca in development mode, specify the path to the local
 source directory::
 
-    $ pip install -e <path/url to Thermca>
+    $ pip install -e <path/url to Thermca> --no-dependencies
 
 This just links to the given directory. If the sources are moved or 
 deleted, importing the package will fail.
-
-To create a source distribution::
-
-    $ python -m build
 
 Export an working environment to a YAML file::
 
