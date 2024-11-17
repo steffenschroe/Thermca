@@ -1,7 +1,7 @@
 [project]
 name = "Thermca"
 requires-python = ">=3.10"  # Black also interprets this
-version = "0.9"
+version = "0.10"
 readme = "README.rst"
 authors = [{name = "Steffen Schroeder"}]
 license = {text = "GPL-3", license_file = "LICENSE.rst"}
