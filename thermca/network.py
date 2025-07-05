@@ -1,4 +1,5 @@
 """Solves the model"""
+
 from collections import defaultdict, namedtuple
 from itertools import chain
 import threading
@@ -155,7 +156,6 @@ class Network:
                 part.init_temp,
                 part.matl,
                 part.lump_cond_meth,
-                part.fe_assembly,
             )
             for part in fe_parts
         ]
@@ -311,9 +311,9 @@ class Network:
         # margin, cond. or film and margin. This needs special handling.
         lp_to_lp_link_elems: list[tuple] = []  # Pairs of two connected LPParts
         lp_to_lp_surf_idxs: list[tuple] = []  # Pairs of part surface indices
-        lp_to_lp_link_idxs_idxs: list[
-            tuple
-        ] = []  # Pairs of indices into part surface index array
+        lp_to_lp_link_idxs_idxs: list[tuple] = (
+            []
+        )  # Pairs of indices into part surface index array
         # Same as above but for run-time changing links
         self.run_lp_to_lp_link_elems: list[tuple] = []
         self.run_lp_to_lp_surf_idxs: list[tuple] = []
@@ -897,12 +897,22 @@ class Network:
         ]
         net_node_count = 0
         elem_slice = {}
-        net_node_count = process_node_elems(temp_unbound_elems, elem_slice, net_node_count)
+        net_node_count = process_node_elems(
+            temp_unbound_elems, elem_slice, net_node_count
+        )
         free_temp_lgth = net_node_count
-        net_node_count = process_node_elems(temp_bound_elems, elem_slice, net_node_count)
+        net_node_count = process_node_elems(
+            temp_bound_elems, elem_slice, net_node_count
+        )
         # Indices of the margin body nodes connected to the specified surface
         body_marg_idxs = {}
-        return elem_node_idxs, net_node_count, elem_slice, free_temp_lgth, body_marg_idxs
+        return (
+            elem_node_idxs,
+            net_node_count,
+            elem_slice,
+            free_temp_lgth,
+            body_marg_idxs,
+        )
 
     def __len__(self):
         """Number of nodes"""

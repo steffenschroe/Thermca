@@ -54,10 +54,6 @@ class FEPart(ModelElement):
             conductance to a plane that contains the body center and
             has a normal vector going through the particular surface
             center.
-        fe_assembly: FEM package for assembly of system matrices; It
-            defaults to 'skfem' (scikit-fem). As an alternative,
-            'fenics' can be specified if the fenics dolfin package is
-            installed.
         temp_dependent: Switch for temperature dependent material
             behavior; If the model has reduced DOF, temperature
             dependent material is not supported.
@@ -74,7 +70,6 @@ class FEPart(ModelElement):
     mor_dof: Optional[int] = None
     mor_ref_temp: Optional[float] = None
     lump_cond_meth: str = SFC_TO_SFC
-    fe_assembly: str = 'skfem'
     temp_dependent: bool = False
     surf: NamedTuple[FEPartSurf] = field(init=False)
     name: str = ''

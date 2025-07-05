@@ -1,18 +1,17 @@
 """Test part implementation"""
+
 import math
 
 import pytest
 from numpy import array, genfromtxt, allclose, zeros, sin, cos, exp, pi
 
 from thermca import *
-from thermca.fem.fe_system import fenics_installed
 
-test_steel = Solid(dens=8000., spec_heat=500., condy=50.)
+test_steel = Solid(dens=8000.0, spec_heat=500.0, condy=50.0)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 20])
-@pytest.mark.parametrize('fe_assembly', ['skfem', 'fenics'])
-def test_part_flux_and_film(mor_dof, fe_assembly):
+def test_part_flux_and_film(mor_dof):
     """Test one dimensional heat flow
 
     The test scenario is a rod with heat flow driven by a temperature
@@ -24,19 +23,16 @@ def test_part_flux_and_film(mor_dof, fe_assembly):
     surfaces.
     """
 
-    if fe_assembly == 'fenics' and not fenics_installed:
-        pytest.skip()
-
     class Rod:
-        lgth = 1.
-        condy = .2
-        dens = 1.
-        spec_heat = 2.
-        init_temp = 1.
-        heat_flux = 1.  # On left end x = 0.
-        bound_temp = 0.  # On right end x = 1.
-        result_lctns = [(.3, 0., 0.)]
-        result_times = array([.01, .02, .05, .1, .2, .5, 1., 2., 5., 10])
+        lgth = 1.0
+        condy = 0.2
+        dens = 1.0
+        spec_heat = 2.0
+        init_temp = 1.0
+        heat_flux = 1.0  # On left end x = 0.
+        bound_temp = 0.0  # On right end x = 1.
+        result_lctns = [(0.3, 0.0, 0.0)]
+        result_times = array([0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10])
 
     def pde(rod):
         """Analytical solution as reference"""
@@ -51,12 +47,12 @@ def test_part_flux_and_film(mor_dof, fe_assembly):
             for ip, p in enumerate(rod.result_lctns):
 
                 def inf_sum(time, x):
-                    sum = 0.
+                    sum = 0.0
                     for n in range(1, 50):
-                        kn = (2. * n - 1.) * pi / 2.
+                        kn = (2.0 * n - 1.0) * pi / 2.0
                         fn = (
-                            2.
-                            / kn**2.
+                            2.0
+                            / kn**2.0
                             * (
                                 tx0 * kn * sin(kn)
                                 - t1 * kn * sin(kn)
@@ -82,7 +78,7 @@ def test_part_flux_and_film(mor_dof, fe_assembly):
             )
             env = BoundNode(temp=rod.bound_temp)
             FluxSource(cuboid.surf.left, flux=rod.heat_flux)
-            FilmLink(cuboid.surf.right, env, 1.e3)
+            FilmLink(cuboid.surf.right, env, 1.0e3)
         result = Network(model).sim(
             time_span=(rod.result_times[0], rod.result_times[-1]), method='LSODA'
         )
@@ -96,12 +92,11 @@ def test_part_flux_and_film(mor_dof, fe_assembly):
     # print(f"{ref_temps=}")
     # print(f"{sim_temps=}")
     # print(f"{sim_temps-ref_temps=}")
-    assert allclose(ref_temps, sim_temps, rtol=0, atol=.02)
+    assert allclose(ref_temps, sim_temps, rtol=0, atol=0.02)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
-@pytest.mark.parametrize('fe_assembly', ['skfem', 'fenics'])
-def test_part_heat_and_film(mor_dof, fe_assembly):
+def test_part_heat_and_film(mor_dof):
     """Test 3D heat flow on steel plate with heat and film BCs
 
     The plate has the dimensions of .5 x 1. x .05 in m. The initial
@@ -109,10 +104,8 @@ def test_part_heat_and_film(mor_dof, fe_assembly):
     at the bottom. The other surfaces are coupled with a HTC of
     10 W/(m²K) to environment at 20 °C.
     """
-    if fe_assembly == 'fenics' and not fenics_installed:
-        pytest.skip()
 
-    init_temp = 20.
+    init_temp = 20.0
 
     mesh = Mesh.read('flat_cuboid_fine.med')  # surfs: 'bottom', 'upper_faces'
     # mesh.plot().show()
@@ -122,13 +115,12 @@ def test_part_heat_and_film(mor_dof, fe_assembly):
             mesh,
             test_steel,
             init_temp=init_temp,
-            fe_assembly=fe_assembly,
             mor_dof=mor_dof,
             name='cuboid',
         )
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
-        HeatSource(cuboid.surf.bottom, 1000.)
-        FilmLink(cuboid.surf.upper_faces, env, 10.)
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
+        HeatSource(cuboid.surf.bottom, 1000.0)
+        FilmLink(cuboid.surf.upper_faces, env, 10.0)
 
     net = Network(model)
 
@@ -147,23 +139,40 @@ def test_part_heat_and_film(mor_dof, fe_assembly):
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[cuboid.surf.bottom].temp(ref_time)
-    sim_btm_vert, sim_top_vert = res[cuboid].temp(
-        ref_time, lctn=[(0., 0., .05,), (.5, 1., .05,)]).T
-    # print(f"{mor_dof=}, {fe_assembly=}")
+    sim_btm_vert, sim_top_vert = (
+        res[cuboid]
+        .temp(
+            ref_time,
+            lctn=[
+                (
+                    0.0,
+                    0.0,
+                    0.05,
+                ),
+                (
+                    0.5,
+                    1.0,
+                    0.05,
+                ),
+            ],
+        )
+        .T
+    )
+    # print(f"{mor_dof=}")
     # print(rtol(ref_bottom - init_temp, sim_bottom - init_temp))
     # print(rtol(ref_top_vert - init_temp, sim_top_vert - init_temp))
     # print(rtol(ref_btm_vert - init_temp, sim_btm_vert - init_temp))
     if mor_dof is None:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0007)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.002)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.0006)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.0007)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.002)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.0006)
     else:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0013)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.061)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.0071)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.0013)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.061)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.0071)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
@@ -177,7 +186,7 @@ def test_part_multi_film_on_surf(mor_dof):
     10 W/(m²K) to environment at 20 °C.
     """
 
-    init_temp = 20.
+    init_temp = 20.0
 
     mesh = Mesh.read('flat_cuboid_fine.med')  # surfs: 'bottom', 'upper_faces'
 
@@ -185,11 +194,11 @@ def test_part_multi_film_on_surf(mor_dof):
         cuboid = FEPart(
             mesh, test_steel, init_temp=init_temp, mor_dof=mor_dof, name='cuboid'
         )
-        env0 = BoundNode(temp=20., posn=(-.3, .25, .025), name='environment0')
-        env1 = BoundNode(temp=20., posn=(-.3, .75, .025), name='environment1')
-        HeatSource(cuboid.surf.bottom, 1000.)
-        FilmLink(cuboid.surf.upper_faces, env0, 4.)
-        FilmLink(cuboid.surf.upper_faces, env1, 6.)
+        env0 = BoundNode(temp=20.0, posn=(-0.3, 0.25, 0.025), name='environment0')
+        env1 = BoundNode(temp=20.0, posn=(-0.3, 0.75, 0.025), name='environment1')
+        HeatSource(cuboid.surf.bottom, 1000.0)
+        FilmLink(cuboid.surf.upper_faces, env0, 4.0)
+        FilmLink(cuboid.surf.upper_faces, env1, 6.0)
 
     net = Network(model)
 
@@ -208,28 +217,44 @@ def test_part_multi_film_on_surf(mor_dof):
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[cuboid.surf.bottom].temp(ref_time)
-    sim_btm_vert, sim_top_vert = res[cuboid].temp(
-        ref_time, lctn=[(0., 0., .05,), (.5, 1., .05,)]).T
+    sim_btm_vert, sim_top_vert = (
+        res[cuboid]
+        .temp(
+            ref_time,
+            lctn=[
+                (
+                    0.0,
+                    0.0,
+                    0.05,
+                ),
+                (
+                    0.5,
+                    1.0,
+                    0.05,
+                ),
+            ],
+        )
+        .T
+    )
     # print(f"{mor_dof=}")
     # print(rtol(ref_bottom - init_temp, sim_bottom - init_temp))
     # print(rtol(ref_top_vert - init_temp, sim_top_vert - init_temp))
     # print(rtol(ref_btm_vert - init_temp, sim_btm_vert - init_temp))
     if mor_dof is None:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0007)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.002)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.0006)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.0007)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.002)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.0006)
     else:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.0009)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.2)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.007)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.0009)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.2)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.007)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
-@pytest.mark.parametrize('fe_assembly', ['skfem', 'fenics'])
-def test_part_heat_and_film_on_multi_surf(mor_dof, fe_assembly):
+def test_part_heat_and_film_on_multi_surf(mor_dof):
     """Steel plate with transient three-dimensional heat flow
 
     The plate has the dimensions of .5 x 1. x .05 in m. The initial
@@ -237,10 +262,8 @@ def test_part_heat_and_film_on_multi_surf(mor_dof, fe_assembly):
     at the bottom. The other surfaces are coupled with a HTC of
     10 W/(m²K) to environment at 20 °C.
     """
-    if fe_assembly == 'fenics' and not fenics_installed:
-        pytest.skip()
 
-    init_temp = 20.
+    init_temp = 20.0
 
     mesh = Mesh.read('plate.msh')
 
@@ -249,12 +272,11 @@ def test_part_heat_and_film_on_multi_surf(mor_dof, fe_assembly):
             mesh,
             test_steel,
             init_temp=init_temp,
-            fe_assembly=fe_assembly,
             mor_dof=mor_dof,
             name='cuboid',
         )
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
-        HeatSource(plate.surf.bottom, 1000.)
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
+        HeatSource(plate.surf.bottom, 1000.0)
         FilmLink.multi(
             [
                 plate.surf.left,
@@ -264,7 +286,7 @@ def test_part_heat_and_film_on_multi_surf(mor_dof, fe_assembly):
                 plate.surf.top,
             ],
             env,
-            10.,
+            10.0,
         )
 
     net = Network(model)
@@ -284,23 +306,40 @@ def test_part_heat_and_film_on_multi_surf(mor_dof, fe_assembly):
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[plate.surf.bottom].temp(ref_time)
-    sim_btm_vert, sim_top_vert = res[plate].temp(
-        ref_time, lctn=[(0., 0., .05,), (.5, 1., .05,)]).T
-    # print(f"{mor_dof=}, {fe_assembly=}")
+    sim_btm_vert, sim_top_vert = (
+        res[plate]
+        .temp(
+            ref_time,
+            lctn=[
+                (
+                    0.0,
+                    0.0,
+                    0.05,
+                ),
+                (
+                    0.5,
+                    1.0,
+                    0.05,
+                ),
+            ],
+        )
+        .T
+    )
+    # print(f"{mor_dof=}")
     # print(rtol(ref_bottom - init_temp, sim_bottom - init_temp))
     # print(rtol(ref_top_vert - init_temp, sim_top_vert - init_temp))
     # print(rtol(ref_btm_vert - init_temp, sim_btm_vert - init_temp))
     if mor_dof is None:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.003)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.02)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.006)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.003)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.02)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.006)
     else:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.003)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.06)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.003)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.003)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.06)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.003)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
@@ -317,16 +356,16 @@ def test_part_with_film_func(mor_dof):
 
     def film_10(surf_temp, surround_temp, fluid=None):
         """Gets called in every solution step"""
-        return 10.
+        return 10.0
 
     mesh = Mesh.read('flat_cuboid_fine.med')  # surfs: 'bottom', 'upper_faces'
 
     with Model() as model:
         cuboid = FEPart(
-            mesh, test_steel, init_temp=20., mor_dof=mor_dof, name='cuboid'
+            mesh, test_steel, init_temp=20.0, mor_dof=mor_dof, name='cuboid'
         )
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
-        HeatSource(cuboid.surf.bottom, 1000.)
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
+        HeatSource(cuboid.surf.bottom, 1000.0)
         FilmLink(cuboid.surf.upper_faces, env, film_10)
 
     net = Network(model)
@@ -342,14 +381,14 @@ def test_part_with_film_func(mor_dof):
     ref_time = ansys_res['Time']
     ref_bottom = ansys_res['Bottom']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
 
     sim_bottom = res[cuboid.surf.bottom].temp(ref_time)
     # print(f"{mor_dof=}")
     # print(f"{ref_time}")
     # print(f"{ref_bottom}")
     # print(f"{abs(ref_bottom-sim_bottom)=}")
-    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=.7)
+    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=0.7)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
@@ -371,24 +410,24 @@ def test_two_connected_parts(mor_dof):
         lower_cuboid = FEPart(
             half_cuboid,
             test_steel,
-            init_temp=20.,
+            init_temp=20.0,
             mor_dof=mor_dof,
             name='lower_cuboid',
         )
         upper_cuboid = FEPart(
             half_cuboid,
             test_steel,
-            posn=(0., .5, 0.),
+            posn=(0.0, 0.5, 0.0),
             mor_dof=mor_dof,
-            init_temp=20.,
+            init_temp=20.0,
             name='upper_cuboid',
         )
-        env = BoundNode(temp=20., name='environment')
-        HeatSource(lower_cuboid.surf.bottom, 1000.)
-        FilmLink(lower_cuboid.surf.middel, env, 10.)
-        FilmLink(lower_cuboid.surf.top, upper_cuboid.surf.bottom, 1000.)
-        FilmLink(upper_cuboid.surf.middel, env, 10.)
-        FilmLink(upper_cuboid.surf.top, env, 10.)
+        env = BoundNode(temp=20.0, name='environment')
+        HeatSource(lower_cuboid.surf.bottom, 1000.0)
+        FilmLink(lower_cuboid.surf.middel, env, 10.0)
+        FilmLink(lower_cuboid.surf.top, upper_cuboid.surf.bottom, 1000.0)
+        FilmLink(upper_cuboid.surf.middel, env, 10.0)
+        FilmLink(upper_cuboid.surf.top, env, 10.0)
 
     net = Network(model)
 
@@ -403,12 +442,12 @@ def test_two_connected_parts(mor_dof):
     ref_time = ansys_res['Time']
     ref_bottom = ansys_res['Bottom']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     sim_bottom = res[lower_cuboid.surf.bottom].temp(ref_time)
     # Mean dock temperature
     # print(f"{mor_dof=}")
     # print(f"{abs(ref_bottom-sim_bottom)=}")
-    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=2.)
+    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=2.0)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 30])
@@ -439,9 +478,9 @@ def test_connected_parts_with_film_between_unequal_surfaces(mor_dof):
     ref_outer_tube_outer = inner_source_ref_res['outer_tube_outer']
     inner_mesh = Mesh.read('inner_tube.med')
     outer_mesh = Mesh.read('outer_tube.med')
-    init_temp = 20.
-    outer_film = 100.
-    gap_film = 1000.
+    init_temp = 20.0
+    outer_film = 100.0
+    gap_film = 1000.0
 
     with Model() as fem_model:
         inner_tube = FEPart(
@@ -458,41 +497,40 @@ def test_connected_parts_with_film_between_unequal_surfaces(mor_dof):
             mor_dof=mor_dof,
             name='outer_tube',
         )
-        env = BoundNode(temp=init_temp, posn=(0., .13, .025), name='environment')
+        env = BoundNode(temp=init_temp, posn=(0.0, 0.13, 0.025), name='environment')
         FilmLink(inner_tube.surf.outer, outer_tube.surf.inner, gap_film)
         FilmLink(outer_tube.surf.outer, env, outer_film)
-        HeatSource(inner_tube.surf.inner, 250.)
+        HeatSource(inner_tube.surf.inner, 250.0)
     # fem_model.plot().show()
     net = Network(fem_model)
     # net.plot().show()
-    res = net.sim((0., 1.5 * 60 * 60), method='RK45')
+    res = net.sim((0.0, 1.5 * 60 * 60), method='RK45')
     outer_tube_outer_temps = res[outer_tube.surf.outer].temp(time=ref_times)
     # print(f"{mor_dof=}")
     print("dtemp_max: ", max(abs(ref_outer_tube_outer - outer_tube_outer_temps)))
-    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0., atol=3.5)
+    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0.0, atol=3.5)
     num_temps = len(ref_outer_tube_outer)
     assert allclose(
         (ref_outer_tube_outer - init_temp)[num_temps // 5 :],
         (outer_tube_outer_temps - init_temp)[num_temps // 5 :],
-        rtol=.1,
-        atol=.2,
+        rtol=0.1,
+        atol=0.2,
     )
     # On two outer locations at middle of outer surface
     outer_tube_outer_temps = (
-        res[outer_tube].temp(time=ref_times, lctn=[(0., .1, .025)]).T[0]
+        res[outer_tube].temp(time=ref_times, lctn=[(0.0, 0.1, 0.025)]).T[0]
     )
     print("dtemp_max: ", max(abs(ref_outer_tube_outer - outer_tube_outer_temps)))
-    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0., atol=.6)
-    outer_tube_outer_temps = res[outer_tube].temp(time=ref_times, lctn=[(.1, 0., .025)]).T[0]
+    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0.0, atol=0.6)
+    outer_tube_outer_temps = (
+        res[outer_tube].temp(time=ref_times, lctn=[(0.1, 0.0, 0.025)]).T[0]
+    )
     print("dtemp_max: ", max(abs(ref_outer_tube_outer - outer_tube_outer_temps)))
-    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0., atol=.3)
+    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0.0, atol=0.3)
 
 
 @pytest.mark.parametrize('mor_dof', [None, 10])
-@pytest.mark.parametrize('fe_assembly', ['skfem', 'fenics'])
-def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(
-    mor_dof, fe_assembly
-):
+def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(mor_dof):
     """Transient radial heat flow over two connected parts
 
     The test aims at the thermal connection of unequal surface areas
@@ -510,8 +548,6 @@ def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(
     to temperature bound node with a film coefficient of 50. The
     initial temperature is 20.
     """
-    if fe_assembly == 'fenics' and not fenics_installed:
-        pytest.skip()
 
     inner_source_ref_res = genfromtxt(
         'rings_with_gap_sources.csv', delimiter=',', names=True
@@ -520,16 +556,15 @@ def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(
     ref_outer_tube_outer = inner_source_ref_res['outer_tube_outer']
     inner_mesh = Mesh.read('inner_tube.med')
     outer_mesh = Mesh.read('outer_tube.med')
-    init_temp = 20.
-    gap_film = 500.
-    outer_film = 50.
-    steel = Solid(condy=25., dens=8000., spec_heat=500.)
+    init_temp = 20.0
+    gap_film = 500.0
+    outer_film = 50.0
+    steel = Solid(condy=25.0, dens=8000.0, spec_heat=500.0)
     with Model() as fem_model:
         inner_tube = FEPart(
             mesh=inner_mesh,
             matl=steel,
             init_temp=init_temp,
-            fe_assembly=fe_assembly,
             mor_dof=mor_dof,
             name='inner_tube',
         )
@@ -537,35 +572,34 @@ def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(
             mesh=outer_mesh,
             matl=steel,
             init_temp=init_temp,
-            fe_assembly=fe_assembly,
             mor_dof=mor_dof,
             name='outer_tube',
         )
         env = BoundNode(
             temp=init_temp,
-            posn=(0., .13, .025),
+            posn=(0.0, 0.13, 0.025),
             name='environment',
         )
         FilmLink(inner_tube.surf.outer, outer_tube.surf.inner, gap_film)
         FilmLink(outer_tube.surf.outer, env, outer_film)
         FilmLink(inner_tube.surf.inner, env, outer_film)
-        HeatSource(inner_tube.surf.outer, 150.)
-        HeatSource(outer_tube.surf.inner, 250.)
+        HeatSource(inner_tube.surf.outer, 150.0)
+        HeatSource(outer_tube.surf.inner, 250.0)
     # fem_model.plot().show()
     net = Network(fem_model)
     # net.plot().show()
-    res = net.sim((0., 3. * 60 * 60))
+    res = net.sim((0.0, 3.0 * 60 * 60))
     outer_tube_outer_temps = res[outer_tube.surf.outer].temp(time=ref_times)
     # print(f"{mor_dof=}")
     # print(f"{ref_outer_tube_outer=}, \n{outer_tube_outer_temps=}")
     # print("dtemp_max: ", max(abs(ref_outer_tube_outer-outer_tube_outer_temps)))
     num_temps = len(ref_outer_tube_outer)
-    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0., atol=.4)
+    assert allclose(ref_outer_tube_outer, outer_tube_outer_temps, rtol=0.0, atol=0.4)
     assert allclose(
         (ref_outer_tube_outer - init_temp)[num_temps // 5 :],
         (outer_tube_outer_temps - init_temp)[num_temps // 5 :],
-        rtol=.01,
-        atol=0.,
+        rtol=0.01,
+        atol=0.0,
     )
 
 
@@ -577,18 +611,35 @@ def test_part_with_temp_dep_condy():
     """
 
     class Rod:
-        lgth = 1.
-        condy = array([[0., 5.], [.1, .5]])
-        dens = 1.
-        spec_heat = 2.
-        initial_temp = 1.
-        heat_flux = 1.  # On left end x = 0.
-        border_temp = 0.  # On right end x = 1.
-        result_lctns = [(.3, 0., 0.)]
+        lgth = 1.0
+        condy = array([[0.0, 5.0], [0.1, 0.5]])
+        dens = 1.0
+        spec_heat = 2.0
+        initial_temp = 1.0
+        heat_flux = 1.0  # On left end x = 0.
+        border_temp = 0.0  # On right end x = 1.
+        result_lctns = [(0.3, 0.0, 0.0)]
 
     # Reference temperature at x = .3, calculated with lumped parameter model
-    ref_times = array([.01, 1.244, 2.252, 3.177, 4.055, 4.905, 5.734, 6.548, 7.354, 8.152, 8.945, 9.736])
-    ref_temps = array([1., 1.773, 2.199, 2.47, 2.657, 2.787, 2.88, 2.946, 2.994, 3.028, 3.052, 3.07])
+    ref_times = array(
+        [
+            0.01,
+            1.244,
+            2.252,
+            3.177,
+            4.055,
+            4.905,
+            5.734,
+            6.548,
+            7.354,
+            8.152,
+            8.945,
+            9.736,
+        ]
+    )
+    ref_temps = array(
+        [1.0, 1.773, 2.199, 2.47, 2.657, 2.787, 2.88, 2.946, 2.994, 3.028, 3.052, 3.07]
+    )
 
     cuboid_mesh = Mesh.read('rod_1x.05x.05.med')  # With vertex at x = .3
     test_matl = Solid(
@@ -606,13 +657,13 @@ def test_part_with_temp_dep_condy():
         )
         env = BoundNode(temp=Rod.border_temp)
         FluxSource(cuboid.surf.left, flux=Rod.heat_flux)
-        FilmLink(cuboid.surf.right, env, 1.e3)
+        FilmLink(cuboid.surf.right, env, 1.0e3)
     result = Network(model).sim(time_span=(ref_times[0], ref_times[-1]), method='LSODA')
     temps = result[cuboid].temp(ref_times, Rod.result_lctns).ravel()
     # print(f"{ref_temps=}")
     # print(f"{temps=}")
     # print(f"{temps-ref_temps=}")
-    assert allclose(ref_temps, temps, rtol=0, atol=.005)
+    assert allclose(ref_temps, temps, rtol=0, atol=0.005)
 
 
 def test_part_with_temp_dep_dens():
@@ -623,18 +674,22 @@ def test_part_with_temp_dep_dens():
     """
 
     class Rod:
-        lgth = 1.
-        condy = .2
-        dens = array([[0., 5.], [1., .5]])
-        spec_heat = 2.
-        initial_temp = 1.
-        heat_flux = 1.  # On left end x = 0.
-        border_temp = 0.  # On right end x = 1.
-        result_lctns = [(.3, 0., 0.)]
+        lgth = 1.0
+        condy = 0.2
+        dens = array([[0.0, 5.0], [1.0, 0.5]])
+        spec_heat = 2.0
+        initial_temp = 1.0
+        heat_flux = 1.0  # On left end x = 0.
+        border_temp = 0.0  # On right end x = 1.
+        result_lctns = [(0.3, 0.0, 0.0)]
 
     # Reference temperature at x = .3, calculated with lumped parameter model
-    ref_times = array([.01, 1.212, 2.304, 3.325, 4.297, 5.236, 6.148, 7.043, 7.925, 8.798, 9.665])
-    ref_temps = array([1., 1.769, 2.28, 2.631, 2.88, 3.057, 3.184, 3.275, 3.341, 3.388, 3.422])
+    ref_times = array(
+        [0.01, 1.212, 2.304, 3.325, 4.297, 5.236, 6.148, 7.043, 7.925, 8.798, 9.665]
+    )
+    ref_temps = array(
+        [1.0, 1.769, 2.28, 2.631, 2.88, 3.057, 3.184, 3.275, 3.341, 3.388, 3.422]
+    )
 
     cuboid_mesh = Mesh.read('rod_1x.05x.05.med')  # With vertex at x = .3
     test_matl = Solid(
@@ -652,13 +707,13 @@ def test_part_with_temp_dep_dens():
         )
         env = BoundNode(temp=Rod.border_temp)
         FluxSource(cuboid.surf.left, flux=Rod.heat_flux)
-        FilmLink(cuboid.surf.right, env, 1.e3)
+        FilmLink(cuboid.surf.right, env, 1.0e3)
     result = Network(model).sim(time_span=(ref_times[0], ref_times[-1]), method='LSODA')
     temps = result[cuboid].temp(ref_times, Rod.result_lctns).ravel()
     # print(f"{ref_temps=}")
     # print(f"{temps=}")
     # print(f"{temps-ref_temps=}")
-    assert allclose(ref_temps, temps, rtol=0, atol=.02)
+    assert allclose(ref_temps, temps, rtol=0, atol=0.02)
 
 
 def rtol(sim, ref):
