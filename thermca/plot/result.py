@@ -1198,7 +1198,7 @@ if __name__ == '__main__':
             temp=20.,
             posn=(.0,),
             name='Source')
-        MatlNode.is_temp_dep = True
+        MatlNode.is_temp_dependent = True
         water0 = MatlNode(
             posn=(.125, ),
             vol=vol,

@@ -147,16 +147,8 @@ def test_part_heat_and_film(mor_dof):
         .temp(
             ref_time,
             lctn=[
-                (
-                    0.0,
-                    0.0,
-                    0.05,
-                ),
-                (
-                    0.5,
-                    1.0,
-                    0.05,
-                ),
+                (0.0, 0.0, 0.05),
+                (0.5, 1.0, 0.05),
             ],
         )
         .T
@@ -225,16 +217,8 @@ def test_part_multi_film_on_surf(mor_dof):
         .temp(
             ref_time,
             lctn=[
-                (
-                    0.0,
-                    0.0,
-                    0.05,
-                ),
-                (
-                    0.5,
-                    1.0,
-                    0.05,
-                ),
+                (0.0, 0.0, 0.05),
+                (0.5, 1.0, 0.05),
             ],
         )
         .T
@@ -603,7 +587,7 @@ def test_connected_parts_with_unequal_heat_sources_on_connected_surfaces(mor_dof
     )
 
 
-def test_part_with_temp_dep_condy():
+def test_part_with_temp_dependent_condy():
     """Rod with transient axial heat flow and temperature dependent conductivity
 
     The heat flow is caused by one temperature bound base and one heat
@@ -621,25 +605,14 @@ def test_part_with_temp_dep_condy():
         result_lctns = [(0.3, 0.0, 0.0)]
 
     # Reference temperature at x = .3, calculated with lumped parameter model
+    # fmt: off
     ref_times = array(
-        [
-            0.01,
-            1.244,
-            2.252,
-            3.177,
-            4.055,
-            4.905,
-            5.734,
-            6.548,
-            7.354,
-            8.152,
-            8.945,
-            9.736,
-        ]
+        [0.01, 1.244, 2.252, 3.177, 4.055, 4.905, 5.734, 6.548, 7.354, 8.152, 8.945, 9.736]
     )
     ref_temps = array(
         [1.0, 1.773, 2.199, 2.47, 2.657, 2.787, 2.88, 2.946, 2.994, 3.028, 3.052, 3.07]
     )
+    # fmt: on
 
     cuboid_mesh = Mesh.read('rod_1x.05x.05.med')  # With vertex at x = .3
     test_matl = Solid(
@@ -666,7 +639,7 @@ def test_part_with_temp_dep_condy():
     assert allclose(ref_temps, temps, rtol=0, atol=0.005)
 
 
-def test_part_with_temp_dep_dens():
+def test_part_with_temp_dependent_dens():
     """Rod with transient axial heat flow and temperature dependent density
 
     The heat flow is caused by one temperature bound base and one heat

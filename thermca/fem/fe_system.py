@@ -83,8 +83,8 @@ class FESystem:
         self.Lx = Lx  # Geometry only; only needed for body properties with mean body temperature
         self.L = matl.condy_interp(init_temp) * Lx
 
-        # TODO: create the following only in case of Part.temp_dep = True to save memory
-        Lx_base = Lx.copy()  # Lx without negated sum of rows on diagonal
+        # TODO: create the following only in case of Part.temp_dependent = True to save memory
+        Lx_base = self.Lx.copy()  # Lx without negated sum of rows on diagonal
         self.Lx_base = Lx_base
         Lx_base_coo = Lx_base.tocoo(copy=False)
         self.Lx_base_coo = Lx_base_coo

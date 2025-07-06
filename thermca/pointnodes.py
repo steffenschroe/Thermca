@@ -131,7 +131,7 @@ class MatlNode(ModelElement):
 
     It can be used to define a thermal capacity with material and
     volume. The temperature dependent thermal capacity of the node
-    material is implicit considered if 'is_temp_dep' is True.
+    material is implicit considered if 'is_temp_dependent' is True.
     Alternatively the node can represent a fluid for modeling
     convective heat exchange between solid bodies and fluids. In this
     case the temperature dependent material properties in the

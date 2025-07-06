@@ -3,11 +3,12 @@
 import math
 
 import pytest
+# fmt: off
 from numpy import (
-    array, sin, cos, pi, zeros, exp, set_printoptions, max as amax, abs as aabs, allclose,
-    genfromtxt
+    array, sin, cos, pi, zeros, exp, set_printoptions, max as amax, abs as aabs,
+    allclose, genfromtxt
 )
-
+# fmt: on
 from thermca.lib import lp_parts
 from thermca.lpm.asm import Asm
 from thermca.lpm.cube import Cube
@@ -46,12 +47,12 @@ def test_1d_heat_flow_in_cyl_and_block_linked_by_film_coef():
             for ip, p in enumerate(rod.result_lctns):
 
                 def inf_sum(time, x):
-                    sum = 0.
+                    sum = 0.0
                     for n in range(1, 50):
-                        kn = (2. * n - 1.) * pi / 2.
+                        kn = (2.0 * n - 1.0) * pi / 2.0
                         fn = (
-                            2.
-                            / kn**2.
+                            2.0
+                            / kn**2.0
                             * (
                                 tx0 * kn * sin(kn)
                                 - t1 * kn * sin(kn)
@@ -126,24 +127,24 @@ def test_1d_heat_flow_in_cyl_and_block_linked_by_film_coef():
             print("Relative deviation: ", rel_deviation)
             max_rel_deviation = amax(aabs(rel_deviation))
             print("Max. rel. devitat.: ", max_rel_deviation)
-            assert max_rel_deviation < .041, (
+            assert max_rel_deviation < 0.041, (
                 "The simulated temperature has a too " "large relative deviation."
             )
 
     class Rod:
         body = None
         node_count = 5
-        lgth = 1.
-        condy = 1.
-        dens = 1.
-        spec_heat = 1.
-        init_temp = 0.
-        heat_flux = 1.
-        end_face_temp = 0.
+        lgth = 1.0
+        condy = 1.0
+        dens = 1.0
+        spec_heat = 1.0
+        init_temp = 0.0
+        heat_flux = 1.0
+        end_face_temp = 0.0
         result_lctns = array(
-            [(.3, 0., 0.), (.7, 0., 0.)]
+            [(0.3, 0.0, 0.0), (0.7, 0.0, 0.0)]
         )  # On node locations because of missing interpolation
-        result_times = array([.01, .02, .05, .1, .2, .5, 1., 2., 5., 10])
+        result_times = array([0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10])
 
     for body in ['cyl', 'block']:
         Rod.body = body
@@ -151,16 +152,16 @@ def test_1d_heat_flow_in_cyl_and_block_linked_by_film_coef():
         print("\n* Initial values\n")
         analyse_results(Rod, calculate_pde(Rod), simulate(Rod))
         print("\n* Doubled conductivity\n")
-        Rod.condy = 2.
+        Rod.condy = 2.0
         analyse_results(Rod, calculate_pde(Rod), simulate(Rod))
         print("\n* Doubled capacity\n")
-        Rod.condy = 1.
-        Rod.dens = 2.
+        Rod.condy = 1.0
+        Rod.dens = 2.0
         analyse_results(Rod, calculate_pde(Rod), simulate(Rod))
         print("\n* Doubled lgth\n")
-        Rod.dens = 1.
-        Rod.lgth = 2.
-        Rod.result_lctns = array([(.6, 0., 0.), (1.4, 0., 0.)])
+        Rod.dens = 1.0
+        Rod.lgth = 2.0
+        Rod.result_lctns = array([(0.6, 0.0, 0.0), (1.4, 0.0, 0.0)])
         analyse_results(Rod, calculate_pde(Rod), simulate(Rod))
 
 
@@ -176,18 +177,18 @@ def test_2d_heat_flow_on_blocks_connected_by_film_coefs_stationary():
     reference conductance based on a high resolution model.
     """
     spatial_div = 8
-    test_matl = Solid(condy=1., dens=1., spec_heat=1.)
+    test_matl = Solid(condy=1.0, dens=1.0, spec_heat=1.0)
     with Asm() as asm:
         lower = Cube(
-            width=1.,
-            hgt=.5,
+            width=1.0,
+            hgt=0.5,
             width_div=spatial_div,
             hgt_div=spatial_div // 2,
         )
         upper = Cube(
-            posn=(0, .5, 0.),
-            width=1.,
-            hgt=.5,
+            posn=(0, 0.5, 0.0),
+            width=1.0,
+            hgt=0.5,
             width_div=spatial_div,
             hgt_div=(spatial_div // 2),
         )
@@ -198,26 +199,26 @@ def test_2d_heat_flow_on_blocks_connected_by_film_coefs_stationary():
         block = LPPart(
             asm=asm,
             matl=test_matl,
-            init_temp=0.,
+            init_temp=0.0,
             name='block',
         )
         stat_node = StatNode()
         FilmLink(block.surf.left, stat_node, film=1e32)
-        HeatSource(stat_node, heat=1.)
+        HeatSource(stat_node, heat=1.0)
         # Boundary temperatures on part surfaces are not possible
         # Use a linked temperature bound node instead
-        bound_node = BoundNode(temp=0.)
+        bound_node = BoundNode(temp=0.0)
         FilmLink(block.surf.right, bound_node, film=1e32)
     net = Network(model)
-    sim_duration = 5.
+    sim_duration = 5.0
     result = net.sim([0, sim_duration])
     # conductance for simulation and pde
     # cond = heat/delta_temp
-    sim_cond = 1. / abs(result[block.surf.left].temp(sim_duration))
-    ref_cond = .81927  # measured at spatial resolution of 640x640
+    sim_cond = 1.0 / abs(result[block.surf.left].temp(sim_duration))
+    ref_cond = 0.81927  # measured at spatial resolution of 640x640
     # print('calculated conductance:   ', sim_cond)
     # print('reference conductance:   ', ref_cond)
-    assert allclose(sim_cond, [ref_cond], rtol=.02), (
+    assert allclose(sim_cond, [ref_cond], rtol=0.02), (
         'The simulated conductance is not close enough to the ' 'expected result!'
     )
 
@@ -232,13 +233,13 @@ def test_3d_heat_flow_on_block_with_heat_and_film_bcs(heat_in_body):
     at the bottom. The other surfaces are coupled with a HTC of
     10 W/(m²K) to environment at 20 °C.
     """
-    steel = Solid(dens=8000., spec_heat=500., condy=50.)
+    steel = Solid(dens=8000.0, spec_heat=500.0, condy=50.0)
 
     with Asm() as asm:
         block = Cube(
-            width=.5,
-            hgt=1.,
-            depth=.05,
+            width=0.5,
+            hgt=1.0,
+            depth=0.05,
             width_div=20,
             hgt_div=80,
             depth_div=2,
@@ -255,18 +256,18 @@ def test_3d_heat_flow_on_block_with_heat_and_film_bcs(heat_in_body):
         )
         Surf(name='btm', faces=[block.face.btm])
 
-    init_temp = 20.
+    init_temp = 20.0
     with Model() as model:
         cuboid = LPPart(asm=asm, matl=steel, init_temp=init_temp, name='cuboid')
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
-        FilmLink(cuboid.surf.upper_faces, env, 10.)
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
+        FilmLink(cuboid.surf.upper_faces, env, 10.0)
 
         if heat_in_body:
-            HeatSource(cuboid.surf.btm, 1000.)
+            HeatSource(cuboid.surf.btm, 1000.0)
         else:
             stat_node = StatNode()
             FilmLink(cuboid.surf.btm, stat_node, film=1e32)
-            HeatSource(stat_node, heat=1000.)
+            HeatSource(stat_node, heat=1000.0)
 
     net = Network(model)
 
@@ -285,23 +286,23 @@ def test_3d_heat_flow_on_block_with_heat_and_film_bcs(heat_in_body):
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[cuboid.surf.btm].temp(ref_time)
     sim_btm_vert, sim_top_vert = (
-        res[cuboid].temp(ref_time, lctn=[(0., 0., .05), (.5, 1., .05)]).T
+        res[cuboid].temp(ref_time, lctn=[(0.0, 0.0, 0.05), (0.5, 1.0, 0.05)]).T
     )
     # print(rtol(ref_bottom-init_temp, sim_bottom-init_temp))
     # print(rtol(ref_top_vert-init_temp, sim_top_vert-init_temp))
     # print(rtol(ref_btm_vert-init_temp, sim_btm_vert-init_temp))
     if heat_in_body:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.03)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.009)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.02)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.03)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.009)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.02)
     else:
-        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.03)
-        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.009)
-        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.01)
+        assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.03)
+        assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.009)
+        assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.01)
 
 
 def test_part_multi_film_on_surf():
@@ -314,15 +315,15 @@ def test_part_multi_film_on_surf():
     10 W/(m²K) to environment at 20 °C. The HTC is split to two
     environments.
     """
-    init_temp = 20.
+    init_temp = 20.0
 
-    steel = Solid(dens=8000., spec_heat=500., condy=50.)
+    steel = Solid(dens=8000.0, spec_heat=500.0, condy=50.0)
 
     with Asm() as asm:
         block = Cube(
-            width=.5,
-            hgt=1.,
-            depth=.05,
+            width=0.5,
+            hgt=1.0,
+            depth=0.05,
             width_div=20,
             hgt_div=80,
             depth_div=2,
@@ -341,11 +342,11 @@ def test_part_multi_film_on_surf():
 
     with Model() as model:
         cuboid = LPPart(asm=asm, matl=steel, init_temp=init_temp, name='cuboid')
-        HeatSource(cuboid.surf.btm, 1000.)
-        env0 = BoundNode(temp=20., posn=(-.3, .25, .025), name='environment0')
-        FilmLink(cuboid.surf.upper_faces, env0, 2.)
-        env1 = BoundNode(temp=20., posn=(-.3, .75, .025), name='environment1')
-        FilmLink(cuboid.surf.upper_faces, env1, 8.)
+        HeatSource(cuboid.surf.btm, 1000.0)
+        env0 = BoundNode(temp=20.0, posn=(-0.3, 0.25, 0.025), name='environment0')
+        FilmLink(cuboid.surf.upper_faces, env0, 2.0)
+        env1 = BoundNode(temp=20.0, posn=(-0.3, 0.75, 0.025), name='environment1')
+        FilmLink(cuboid.surf.upper_faces, env1, 8.0)
 
     net = Network(model)
     # Ansys 12800 quadratic and regular hexahedron elements
@@ -363,18 +364,18 @@ def test_part_multi_film_on_surf():
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[cuboid.surf.btm].temp(ref_time)
     sim_btm_vert, sim_top_vert = (
-        res[cuboid].temp(ref_time, lctn=[(0., 0., .05), (.5, 1., .05)]).T
+        res[cuboid].temp(ref_time, lctn=[(0.0, 0.0, 0.05), (0.5, 1.0, 0.05)]).T
     )
     # print(rtol(ref_bottom-init_temp, sim_bottom-init_temp))
     # print(rtol(ref_top_vert-init_temp, sim_top_vert-init_temp))
     # print(rtol(ref_btm_vert-init_temp, sim_btm_vert-init_temp))
-    assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.03)
-    assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.008)
-    assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.03)
+    assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.03)
+    assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.008)
+    assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.03)
 
 
 def test_two_linked_lp_parts0():
@@ -388,13 +389,13 @@ def test_two_linked_lp_parts0():
     environments.
     """
 
-    steel = Solid(dens=8000., spec_heat=500., condy=50.)
+    steel = Solid(dens=8000.0, spec_heat=500.0, condy=50.0)
 
     with Asm() as lower_asm:
         block = Cube(
-            width=.5,
-            hgt=.5,
-            depth=.05,
+            width=0.5,
+            hgt=0.5,
+            depth=0.05,
             width_div=8,
             hgt_div=60,
             depth_div=1,
@@ -413,9 +414,9 @@ def test_two_linked_lp_parts0():
 
     with Asm() as upper_asm:
         block = Cube(
-            width=.5,
-            hgt=.5,
-            depth=.05,
+            width=0.5,
+            hgt=0.5,
+            depth=0.05,
             width_div=2,
             hgt_div=40,
             depth_div=1,
@@ -434,21 +435,21 @@ def test_two_linked_lp_parts0():
 
     with Model() as model:
         lower_cuboid = LPPart(
-            asm=lower_asm, matl=steel, init_temp=20., name='lower_cuboid'
+            asm=lower_asm, matl=steel, init_temp=20.0, name='lower_cuboid'
         )
         upper_cuboid = LPPart(
-            posn=(0., .5, 0.),
+            posn=(0.0, 0.5, 0.0),
             asm=upper_asm,
             matl=steel,
-            init_temp=20.,
+            init_temp=20.0,
             name='upper_cuboid',
         )
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
-        HeatSource(lower_cuboid.surf.btm, 1000.)
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
+        HeatSource(lower_cuboid.surf.btm, 1000.0)
         FilmLink.multi(
-            [lower_cuboid.surf.middel, upper_cuboid.surf.upper_faces], env, 10.
+            [lower_cuboid.surf.middel, upper_cuboid.surf.upper_faces], env, 10.0
         )
-        FilmLink(lower_cuboid.surf.top, upper_cuboid.surf.btm, 1000.)
+        FilmLink(lower_cuboid.surf.top, upper_cuboid.surf.btm, 1000.0)
 
     net = Network(model)
 
@@ -464,10 +465,10 @@ def test_two_linked_lp_parts0():
     ref_bottom = ansys_res['Bottom']
 
     res = net.sim(
-        [0., ref_time[-1]],
+        [0.0, ref_time[-1]],
     )
     sim_bottom = res[lower_cuboid.surf.btm].temp(ref_time)
-    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=3.)
+    assert allclose(ref_bottom, sim_bottom, rtol=0, atol=3.0)
 
 
 @pytest.mark.parametrize('film_is_function', [True, False])
@@ -480,7 +481,7 @@ def test_two_linked_lp_parts1(film_is_function):
     connected blocks is measured and compared to a reference value.
     """
 
-    matl = Solid(dens=1., spec_heat=1., condy=1.)
+    matl = Solid(dens=1.0, spec_heat=1.0, condy=1.0)
 
     def film_func(surf_temp, surround_temp, fluid=None):
         return 1e32
@@ -488,39 +489,39 @@ def test_two_linked_lp_parts1(film_is_function):
     with Model() as model:
         left_block = lp_parts.block(
             matl=matl,
-            width=1.,
+            width=1.0,
             width_div=2,
         )
         right_block = lp_parts.block(
             matl=matl,
-            posn=(1., 0., 0),
-            width=2.,
+            posn=(1.0, 0.0, 0),
+            width=2.0,
             width_div=2,
         )
-        left_node = BoundNode(temp=1., posn=(-.5, .5, .5), name='left_node')
+        left_node = BoundNode(temp=1.0, posn=(-0.5, 0.5, 0.5), name='left_node')
         # left_node = StatNode(posn=(-.5, .5, .5), name='left_node')
-        HeatSource(left_node, 1.)
-        right_node = BoundNode(temp=0., posn=(3.5, .5, .5), name='right_node')
+        HeatSource(left_node, 1.0)
+        right_node = BoundNode(temp=0.0, posn=(3.5, 0.5, 0.5), name='right_node')
         left_link = FilmLink(left_block.surf.left, left_node, 1e32)
         FilmLink(right_block.surf.right, right_node, 1e32)
         film = film_func if film_is_function else 1e32
         block_link = FilmLink(left_block.surf.right, right_block.surf.left, film)
 
     net = Network(model)
-    sim_duration = 25.
+    sim_duration = 25.0
     result = net.sim([0, sim_duration])
     # Overall conductance from left to right for simulation and pde
     # cond = heat/delta_temp
     sim_cond = abs(result[left_link].heat(sim_duration))
     # sim_cond = abs(result[left_node].temp(sim_duration))
-    ref_cond = .3333
+    ref_cond = 0.3333
     # print('calculated conductance:   ', sim_cond)
     # print('reference conductance:   ', ref_cond)
-    assert allclose(sim_cond, ref_cond, rtol=.02)
+    assert allclose(sim_cond, ref_cond, rtol=0.02)
     sim_cond = abs(result[block_link].heat(sim_duration))
-    assert allclose(sim_cond, ref_cond, rtol=.02)
+    assert allclose(sim_cond, ref_cond, rtol=0.02)
     sim_film = abs(result[block_link].film(sim_duration))
-    assert allclose(sim_film, 1e32, rtol=.02)
+    assert allclose(sim_film, 1e32, rtol=0.02)
 
 
 def test_film_func():
@@ -535,15 +536,15 @@ def test_film_func():
 
     def film_10(surf_temp, surround_temp, fluid=None):
         """Gets called in every solution step"""
-        return 10.
+        return 10.0
 
-    steel = Solid(dens=8000., spec_heat=500., condy=50.)
+    steel = Solid(dens=8000.0, spec_heat=500.0, condy=50.0)
 
     with Asm() as asm:
         block = Cube(
-            width=.5,
-            hgt=1.,
-            depth=.05,
+            width=0.5,
+            hgt=1.0,
+            depth=0.05,
             width_div=20,
             hgt_div=80,
             depth_div=2,
@@ -560,12 +561,12 @@ def test_film_func():
         )
         Surf(name='btm', faces=[block.face.btm])
 
-    init_temp = 20.
+    init_temp = 20.0
     with Model() as model:
         cuboid = LPPart(asm=asm, matl=steel, init_temp=init_temp, name='cuboid')
-        env = BoundNode(temp=20., posn=(-.3, .5, .025), name='environment')
+        env = BoundNode(temp=20.0, posn=(-0.3, 0.5, 0.025), name='environment')
         FilmLink(cuboid.surf.upper_faces, env, film_10)
-        HeatSource(cuboid.surf.btm, 1000.)
+        HeatSource(cuboid.surf.btm, 1000.0)
 
     net = Network(model)
 
@@ -584,21 +585,21 @@ def test_film_func():
     ref_top_vert = ansys_res['Top_vertex']
     ref_btm_vert = ansys_res['Bottom_vertex']
 
-    res = net.sim([0., ref_time[-1]], method='LSODA')
+    res = net.sim([0.0, ref_time[-1]], method='LSODA')
     # Test results on mean surface temperatures and node temperatures
     sim_bottom = res[cuboid.surf.btm].temp(ref_time)
     sim_btm_vert, sim_top_vert = (
-        res[cuboid].temp(ref_time, lctn=[(0., 0., .05), (.5, 1., .05)]).T
+        res[cuboid].temp(ref_time, lctn=[(0.0, 0.0, 0.05), (0.5, 1.0, 0.05)]).T
     )
     # print(rtol(ref_bottom-init_temp, sim_bottom-init_temp))
     # print(rtol(ref_top_vert-init_temp, sim_top_vert-init_temp))
     # print(rtol(ref_btm_vert-init_temp, sim_btm_vert-init_temp))
-    assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=.03)
-    assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=.009)
-    assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=.02)
+    assert allclose(ref_bottom - init_temp, sim_bottom - init_temp, rtol=0.03)
+    assert allclose(ref_top_vert - init_temp, sim_top_vert - init_temp, rtol=0.009)
+    assert allclose(ref_btm_vert - init_temp, sim_btm_vert - init_temp, rtol=0.02)
 
 
-def test_temp_dep_condy():
+def test_temp_dependent_condy():
     """Test rod with temperature dependent conductivity
 
     The test scenario is a rod with transient axial heat flow. The
@@ -607,26 +608,24 @@ def test_temp_dep_condy():
     """
 
     class Rod:
-        lgth = 1.
-        condy = array(
-            [[0., 5.],
-             [.1, .5]]
-        )
-        dens = 1.
-        spec_heat = 2.
-        initial_temp = 1.
-        heat_flux = 1.  # On left end x = 0.
-        border_temp = 0.  # On right end x = 1.
-        result_lctns = [(.3, 0., 0.)]
+        lgth = 1.0
+        condy = array([[0.0, 5.0], [0.1, 0.5]])
+        dens = 1.0
+        spec_heat = 2.0
+        initial_temp = 1.0
+        heat_flux = 1.0  # On left end x = 0.
+        border_temp = 0.0  # On right end x = 1.
+        result_lctns = [(0.3, 0.0, 0.0)]
 
     # Reference temperature at x = .3, calculated with lumped parameter model
-    ref_times = array([.01, 1.244, 2.252, 3.177, 4.055, 4.905, 5.734, 6.548, 7.354, 8.152, 8.945, 9.736])
-    ref_temps = array([1., 1.773, 2.199, 2.47, 2.657, 2.787, 2.88, 2.946, 2.994, 3.028, 3.052, 3.07])
-
+    # fmt: off
+    ref_times = array([0.01, 1.244, 2.252, 3.177, 4.055, 4.905, 5.734, 6.548, 7.354, 8.152, 8.945, 9.736])
+    ref_temps = array([1.0, 1.773, 2.199, 2.47, 2.657, 2.787, 2.88, 2.946, 2.994, 3.028, 3.052, 3.07])
+    # fmt: on
     with Asm() as rod_asm:
         # 1x.05x.05
         cyl_rod = Cyl(
-            lgth=1.,
+            lgth=1.0,
             lgth_div=350,  # 5 * x
             name='cyl',
         )
@@ -665,10 +664,10 @@ def test_temp_dep_condy():
     # print(f"{ref_temps=}")
     # print(f"{temps=}")
     # print(f"{temps-ref_temps=}")
-    assert allclose(ref_temps, temps, rtol=0, atol=.005)
+    assert allclose(ref_temps, temps, rtol=0, atol=0.005)
 
 
-def test_temp_dep_dens():
+def test_temp_dependent_dens():
     """Test rod with temperature dependent density
 
     The test scenario is a rod with transient axial heat flow. The
@@ -677,26 +676,27 @@ def test_temp_dep_dens():
     """
 
     class Rod:
-        lgth = 1.
-        condy = .2
-        dens = array(
-            [[0., 5.],
-             [1., .5]]
-        )
-        spec_heat = 2.
-        initial_temp = 1.
-        heat_flux = 1.  # On left end x = 0.
-        border_temp = 0.  # On right end x = 1.
-        result_lctns = [(.3, 0., 0.)]
+        lgth = 1.0
+        condy = 0.2
+        dens = array([[0.0, 5.0], [1.0, 0.5]])
+        spec_heat = 2.0
+        initial_temp = 1.0
+        heat_flux = 1.0  # On left end x = 0.
+        border_temp = 0.0  # On right end x = 1.
+        result_lctns = [(0.3, 0.0, 0.0)]
 
     # Reference temperature at x = .3, calculated with lumped parameter model
-    ref_times = array([.01, 1.212, 2.304, 3.325, 4.297, 5.236, 6.148, 7.043, 7.925, 8.798, 9.665])
-    ref_temps = array([1., 1.769, 2.28, 2.631, 2.88, 3.057, 3.184, 3.275, 3.341, 3.388, 3.422])
+    ref_times = array(
+        [0.01, 1.212, 2.304, 3.325, 4.297, 5.236, 6.148, 7.043, 7.925, 8.798, 9.665]
+    )
+    ref_temps = array(
+        [1.0, 1.769, 2.28, 2.631, 2.88, 3.057, 3.184, 3.275, 3.341, 3.388, 3.422]
+    )
 
     with Asm() as rod_asm:
         # 1x.05x.05
         cyl_rod = Cyl(
-            lgth=1.,
+            lgth=1.0,
             lgth_div=350,  # 5 * x
             name='cyl',
         )
@@ -735,7 +735,7 @@ def test_temp_dep_dens():
     # print(f"{ref_temps=}")
     # print(f"{temps=}")
     # print(f"{temps-ref_temps=}")
-    assert allclose(ref_temps, temps, rtol=0, atol=.006)
+    assert allclose(ref_temps, temps, rtol=0, atol=0.006)
 
 
 def rtol(sim, ref):
