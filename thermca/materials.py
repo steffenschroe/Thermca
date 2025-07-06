@@ -7,7 +7,8 @@ from typing import Union, Sequence
 
 # fmt: off
 from numpy import (
-    array, interp, amin, amax, linspace, float64, union1d, full_like, clip, printoptions
+    array, interp, amin, amax, linspace, float64, union1d, full_like, clip,
+    printoptions, asarray,
 )
 # fmt: on
 from numpy import sum as asum
@@ -33,7 +34,10 @@ class Solid:
     Property units are given in SI standard and temperatures in °C.
 
     Args:
-        condy: Thermal conductivity
+        condy: Thermal conductivity for isotropic material None
+            otherwise
+        orthotropic_condy: Thermal conductivity for orthotropic
+            material in x, y and z direction None otherwise
         spec_heat: Specific heat capacity
         dens: Density
         limits: Temperatures that limit the valid range of the
@@ -90,19 +94,37 @@ class Solid:
     def __init__(
         self,
         *,
-        condy: Union[Sequence, float],  # 2d table, or scalar
         dens: Union[Sequence, float],
         spec_heat: Union[Sequence, float],
+        condy: None | Sequence | float = None,
+        orthotropic_condy: None | Sequence = None,
         limits: Sequence = None,
-        name: str = None
+        name: str = None,
     ):
-        self._condy = self.to_2d_array(condy)
+
+        self._condy = condy
+        if condy is not None:
+            self._condy = self.to_2d_array(condy)
+        self._orthotropic_condy = orthotropic_condy
+        if orthotropic_condy is not None:
+            self._orthotropic_condy = asarray(orthotropic_condy)
+            if self._orthotropic_condy.shape != (3,):
+                raise TypeError(
+                    "Sequence of 3 values for orthotropic conductivity in x, y and z "
+                    "direction expected!"
+                )
+        non_none_count = sum(arg is not None for arg in (orthotropic_condy, condy))
+        if non_none_count != 1:
+            raise ValueError(
+                "Exactly one of 'condy' or 'orthotropic_condy' must be " "set!"
+            )
         self._dens = self.to_2d_array(dens)
         self._spec_heat = self.to_2d_array(spec_heat)
 
         if limits is None:
             self.limits = float('-inf'), float('inf')
-            self.set_limits(self._condy)
+            if condy is not None:
+                self.set_limits(self._condy)
             self.set_limits(self._dens)
             self.set_limits(self._spec_heat)
         else:
@@ -136,7 +158,7 @@ class Solid:
         elif isinstance(prop, (list, tuple, ndarray)):
             prop = array(prop, dtype=float64)
             if not prop.ndim == 2:
-                raise TypeError('2d sequence in regular array shape expected.')
+                raise TypeError("2d sequence in regular array shape expected.")
             return prop
         else:
             TypeError(
@@ -203,6 +225,8 @@ class Solid:
         """
         nshares = [float(s) / sum(shares) for s in shares]
         condys = [m._condy for m in matls]
+        if any(condy is None for condy in condys):
+            raise ValueError("Only materials with isotropic conductivity can be mixed!")
         denss = [m._dens for m in matls]
         spec_heats = [m._spec_heat for m in matls]
         # TODO: more elegant way to handle Fluids
@@ -332,7 +356,7 @@ class Fluid(Solid):
         spec_heat: Union[Sequence, float],
         visc: Union[Sequence, float],
         limits: Sequence = None,
-        name: str = None
+        name: str = None,
     ):
         super().__init__(
             condy=condy,  # 2d table, function or scalar
@@ -424,13 +448,24 @@ def plot(matl, fallback_limits=(0.0, 100.0), mar=0.2):
             horizontalalignment='left',
         )
     left_ax_right = plt.twinx(left_ax_left)
-    if matl._condy.shape[1] > 1:
-        left_ax_left.plot(matl._condy[0], matl._condy[1], color='green')
+    if matl._condy is not None:
+        if matl._condy.shape[1] > 1:
+            left_ax_left.plot(matl._condy[0], matl._condy[1], color='green')
+        else:
+            left_ax_left.plot(temp, full_like(temp, matl._condy[1]), color='green')
     else:
-        left_ax_left.plot(temp, full_like(temp, matl._condy[1]), color='green')
+        left_ax_left.plot(
+            temp, full_like(temp, matl._orthotropic_condy[0]), color='green'
+        )
+        left_ax_left.plot(
+            temp, full_like(temp, matl._orthotropic_condy[1]), color='green'
+        )
+        left_ax_left.plot(
+            temp, full_like(temp, matl._orthotropic_condy[2]), color='green'
+        )
     left_ax_left.set_xlabel(u'Temperature [\u00b0C]')
-    left_ax_left.set_ylabel(u'Conductivity [W/(m\u00B7K)]', color='green')
-    left_ax_right.set_ylabel(u'Density [kg/m\u00B3]', color='red')
+    left_ax_left.set_ylabel(u'Conductivity [W/(m\u00b7K)]', color='green')
+    left_ax_right.set_ylabel(u'Density [kg/m\u00b3]', color='red')
     if matl._dens.shape[1] > 1:
         left_ax_right.plot(matl._dens[0], matl._dens[1], color='red')
     else:
@@ -448,7 +483,7 @@ def plot(matl, fallback_limits=(0.0, 100.0), mar=0.2):
             right_ax_right.plot(matl._visc[0], matl._visc[1], color='magenta')
         else:
             right_ax_right.plot(temp, matl._visc[1], color='magenta')
-        right_ax_right.set_ylabel(u'Kinematic viscosity [m\u00B3/s]', color='magenta')
+        right_ax_right.set_ylabel(u'Kinematic viscosity [m\u00b3/s]', color='magenta')
         right_ax_right.set_ylim(ymin=0)
 
     left_ax_left.set_ylim(ymin=0)

@@ -46,6 +46,7 @@ class FESystem:
         init_temp: Initial temperature
         matl: Material
         lump_cond_meth: Method to calculate lumped parameters
+        temp_dependent: Temperature dependent material
 
     Attributes:
         C_surf: Output matrix of IO-system to get the mean coupling
@@ -60,6 +61,7 @@ class FESystem:
         init_temp,
         matl: Solid,
         lump_cond_meth,
+        temp_dependent,
     ):
         self.init_temp = init_temp
         self.matl = matl
@@ -69,7 +71,9 @@ class FESystem:
 
         (
             Mx_diag,
-            Lx,
+            Lx_x,
+            Lx_y,
+            Lx_z,
             Qs,
             vert_to_dof_idx,
             dof_to_vert_idx,
@@ -80,25 +84,38 @@ class FESystem:
 
         self.Mx_diag = Mx_diag
         self.M_diag = matl.vol_capy_interp(init_temp) * Mx_diag
-        self.Lx = Lx  # Geometry only; only needed for body properties with mean body temperature
-        self.L = matl.condy_interp(init_temp) * Lx
+        self.Lx = (
+            Lx_x + Lx_y + Lx_z
+        )  # Geometry only; only needed for body properties with mean body temperature
+        if matl._condy is not None:
+            self.L = matl.condy_interp(init_temp) * self.Lx
+        if matl._orthotropic_condy is not None:
+            self.L = (
+                matl._orthotropic_condy[0] * Lx_x
+                + matl._orthotropic_condy[1] * Lx_y
+                + matl._orthotropic_condy[2] * Lx_z
+            )
 
-        # TODO: create the following only in case of Part.temp_dependent = True to save memory
-        Lx_base = self.Lx.copy()  # Lx without negated sum of rows on diagonal
-        self.Lx_base = Lx_base
-        Lx_base_coo = Lx_base.tocoo(copy=False)
-        self.Lx_base_coo = Lx_base_coo
-        # L_diag_data_idxs = (Lx_base_coo.row == Lx_base_coo.col).nonzero()[0]
-        self.L_diag_data_idxs = coo_diag_data_idxs(
-            Lx_base.shape, Lx_base.data.shape, Lx_base_coo.row, Lx_base_coo.col
-        )
-        Lx_base.data[self.L_diag_data_idxs] = 0.0
-        # Test for same L like above during update of material data
-        # self.L.data = matl.condy_interp(init_temp) * Lx_base.data
-        # body_temp = full_like(Mx_diag, init_temp)
-        # cond_temp = (body_temp[Lx_base_coo.row] + body_temp[Lx_base_coo.col]) / 2.
-        # self.L.data = matl.condy_interp(cond_temp) * Lx_base.data
-        # self.L.data[self.L_diag_data_idxs] = -self.L.sum(axis=1).ravel()
+        if temp_dependent:
+            if matl._orthotropic_condy is not None:
+                raise ValueError(
+                    "Temperature dependent orthotropic material is not supported!"
+                )
+            Lx_base = self.Lx.copy()  # Lx without negated sum of rows on diagonal
+            self.Lx_base = Lx_base
+            Lx_base_coo = Lx_base.tocoo(copy=False)
+            self.Lx_base_coo = Lx_base_coo
+            # L_diag_data_idxs = (Lx_base_coo.row == Lx_base_coo.col).nonzero()[0]
+            self.L_diag_data_idxs = coo_diag_data_idxs(
+                Lx_base.shape, Lx_base.data.shape, Lx_base_coo.row, Lx_base_coo.col
+            )
+            Lx_base.data[self.L_diag_data_idxs] = 0.0
+            # Test for same L like above during update of material data
+            # self.L.data = matl.condy_interp(init_temp) * Lx_base.data
+            # body_temp = full_like(Mx_diag, init_temp)
+            # cond_temp = (body_temp[Lx_base_coo.row] + body_temp[Lx_base_coo.col]) / 2.
+            # self.L.data = matl.condy_interp(cond_temp) * Lx_base.data
+            # self.L.data[self.L_diag_data_idxs] = -self.L.sum(axis=1).ravel()
 
         self.Qs = Qs
 
@@ -160,7 +177,9 @@ class FESystem:
 
         Returns:
             Mx_diag: Lumped diagonal of the thermal capacity matrix
-            Lx: Thermal conductance matrix
+            Lx_x: Thermal conductance matrix in x direction
+            Lx_y: Thermal conductance matrix in y direction
+            Lx_z: Thermal conductance matrix in z direction
             Qs: Load Matrix with columns for coupling surfaces
                 containing node related surface area
             vert_to_dof: Mapping from mesh vertex to FE-node index
@@ -178,6 +197,18 @@ class FESystem:
             bound_midpts = points[thermca_facet_cells].mean(1)
             dists, idxs = spatial.KDTree(skfem_facet_midpts).query(bound_midpts)
             return idxs
+
+        @fe.BilinearForm
+        def laplace_x(u, v, _):
+            return u.grad[0] * v.grad[0]  # ∂u/∂x * ∂v/∂x
+
+        @fe.BilinearForm
+        def laplace_y(u, v, _):
+            return u.grad[1] * v.grad[1]  # ∂u/∂y * ∂v/∂y
+
+        @fe.BilinearForm
+        def laplace_z(u, v, _):
+            return u.grad[2] * v.grad[2]  # ∂u/∂z * ∂v/∂z
 
         # Prevent skfem console logging warnings
         logging.getLogger().setLevel(100)
@@ -203,10 +234,15 @@ class FESystem:
             for name in surf_meshes.block_names
         ]  # InteriorFacetBasis
 
-        Lx = fe.asm(laplace, body_basis)
-        Mx = fe.asm(mass, body_basis)
+        # Assemble each directional matrix
+        Lx_x = fe.asm(laplace_x, body_basis)
+        Lx_y = fe.asm(laplace_y, body_basis)
+        Lx_z = fe.asm(laplace_z, body_basis)
+
         # Mass lumping for linear elements
+        Mx = fe.asm(mass, body_basis)
         Mx_diag = Mx.sum(axis=1).A.ravel()
+
         Qs = array([fe.asm(unit_load, basis) for basis in surf_basis]).T
         surf_areas = Qs.sum(axis=0)
         vert_to_dof_idx = body_basis.nodal_dofs.ravel()
@@ -218,7 +254,9 @@ class FESystem:
         ]
         return (
             Mx_diag,
-            Lx,
+            Lx_x,
+            Lx_y,
+            Lx_z,
             Qs,
             vert_to_dof_idx,
             dof_to_vert_idx,
@@ -324,14 +362,13 @@ class FESystem:
             meas_surf_meshes.block_names.append(surf_name + '_center_plane')
             meas_surf_meshes.block_types.append('triangle')
 
-        # Create a new FE-system with skfem because inner BCs in
-        # Fenics are very hard to handle
         center_plane_part = FESystem(
             body_mesh=body_mesh,
             surf_meshes=meas_surf_meshes,
             init_temp=init_temp,
             matl=matl,
             lump_cond_meth=None,
+            temp_dependent=False,
         )
 
         conds = []

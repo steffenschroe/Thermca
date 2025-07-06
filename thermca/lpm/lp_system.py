@@ -64,6 +64,8 @@ class LPSystem:
         # self.Lx.data[self.L_diag_data_idxs] = -self.Lx_base[:dof].sum(axis=1).ravel()
 
         self.L = Lx_base.copy()  # Conductance matrix
+        if matl._orthotropic_condy is not None:
+            raise ValueError("Orthotropic material is not supported in LP system!")
         self.L.data = matl.condy_interp(init_temp) * Lx_base.data
         # Placing the sum of the rows on the diagonal is only done for the inner
         # conductances because the margin conductances are added to the film coefficient

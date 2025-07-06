@@ -95,10 +95,17 @@ class FEPart(ModelElement):
                 "surface cell blocks must be of type 'triangle'!"
             )
 
-        if self.temp_dependent and self.mor_dof is not None:
-            raise Exception(
-                "Order reduced part element does not support temperature dependent material properties."
-            )
+        if self.mor_dof is not None:
+            if self.temp_dependent:
+                raise Exception(
+                    "Order reduced part element does not support temperature dependent "
+                    "material properties."
+                )
+            if self.matl._orthotropic_condy is not None:
+                raise ValueError(
+                    "Order reduced part element does not support orthotropic material "
+                    "properties."
+                )
 
         if self.lump_cond_meth not in (None, SFC_TO_SFC, SFC_TO_CENTER_PLANE):
             raise Exception(

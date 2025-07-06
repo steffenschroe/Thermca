@@ -156,6 +156,7 @@ class Network:
                 part.init_temp,
                 part.matl,
                 part.lump_cond_meth,
+                part.temp_dependent,
             )
             for part in fe_parts
         ]
