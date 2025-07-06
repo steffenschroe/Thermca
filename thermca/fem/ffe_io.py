@@ -8,8 +8,6 @@ from thermca._utils.sparse import sparse_dot, sparse_diag_dot_dense
 class FFEIO:
     """Full finite element state space IO-system
 
-    It may be a full FE-system or MOR-system (reduced model order)
-
     Args:
         fe_sys: Full FE system of part
         films: Boundary film coefficients of linked surfaces
