@@ -414,11 +414,8 @@ class LinkProcessing:
             cond = self.data.net_clean_conds[:, self.idxs1, self.idxs0].T.sum(axis=0)
         else:
             cond = (
-                self.data.net_conds.vix[:, self.idxs1, self.idxs0]
-                .todense()
-                .T.sum(axis=1)
+                self.data.net_conds[:, self.idxs1, self.idxs0].todense().sum(axis=1)
             )  # could be summed as coo to save memory
-
         if time is None:
             result = cond
         else:
@@ -504,7 +501,7 @@ class LinkProcessing:
             self.data.net_temps[:, self.idxs0],
             self.data.net_temps[:, self.idxs1],
         )
-        conds = self.data.net_conds.vix[:, self.idxs1, self.idxs0].todense().T
+        conds = self.data.net_conds[:, self.idxs1, self.idxs0].todense()
         heat = ((temps0 - temps1) * conds).sum(axis=1)
         if time is None:
             result = heat
@@ -680,7 +677,9 @@ class ResultData:
         self.net_temps = asarray(net_temps)  # shape=(time_slot_count, node_count)
         self.io_temps = asarray(io_temps)
         self.net_capys = asarray(net_capys)  # shape=(time_slot_count, node_count)
-        self.net_heat_srcs = asarray(net_heat_srcs)  # shape=(time_slot_count, node_count))
+        self.net_heat_srcs = asarray(
+            net_heat_srcs
+        )  # shape=(time_slot_count, node_count))
         self.net_time_consts = asarray(net_time_consts)
         self.net_conds = net_conds  # sparse.DOK
         self.net_clean_conds = asarray(net_clean_conds)
@@ -712,7 +711,9 @@ class ResultData:
             net_heat_srcs=array(
                 collector.net_heat_srcs
             ),  # shape=(time_slot_count, node_count)),
-            net_posns=array(collector.net_posns),  # shape=(time_slot_count, node_count, 3),
+            net_posns=array(
+                collector.net_posns
+            ),  # shape=(time_slot_count, node_count, 3),
             net_time_consts=time_consts,
             net_conds=conds,
             net_clean_conds=array(collector.net_clean_conds),
