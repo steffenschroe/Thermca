@@ -57,7 +57,7 @@ Split planar surface
 
 * Select the body face and create a new sketch in Sketcher workbench
 * Draw the slicing lines in Sketcher
-* Select both, the body and the sketch
+* Select the body first and the sketch as second item in the Model tree
 * Use Part > Split > Slice to compound
 * In Data tab of slice set Mode to Standard
 
@@ -68,7 +68,7 @@ Split cylinder surface
 * Select the rectangle face and create a new sketch in Sketcher
   workbench
 * Draw a slicing circle with cylinder radius in Sketcher
-* Select both, the body and the sketch
+* Select the body first and the sketch as second item in the Model tree
 * Use Part > Split > Slice to compound
 * In Data tab of slice set Mode to Standard
 
