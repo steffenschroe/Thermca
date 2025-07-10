@@ -414,7 +414,9 @@ class LinkProcessing:
             cond = self.data.net_clean_conds[:, self.idxs1, self.idxs0].T.sum(axis=0)
         else:
             cond = (
-                self.data.net_conds[:, self.idxs1, self.idxs0].todense().sum(axis=1)
+                self.data.net_conds.vix[:, self.idxs1, self.idxs0]
+                .todense()
+                .T.sum(axis=1)
             )  # could be summed as coo to save memory
         if time is None:
             result = cond
@@ -501,7 +503,7 @@ class LinkProcessing:
             self.data.net_temps[:, self.idxs0],
             self.data.net_temps[:, self.idxs1],
         )
-        conds = self.data.net_conds[:, self.idxs1, self.idxs0].todense()
+        conds = self.data.net_conds.vix[:, self.idxs1, self.idxs0].todense().T
         heat = ((temps0 - temps1) * conds).sum(axis=1)
         if time is None:
             result = heat

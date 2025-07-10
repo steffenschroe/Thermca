@@ -142,7 +142,7 @@ def _get_net_para_idxs(res):
     conds_sym_idx = []
     conds_asym_idx = []
     for i in range(res.net_conds.shape[0]):
-        cond = res.net_conds[i].to_coo()
+        cond = res.net_conds.vix[i].to_coo()
         conds_sym_idx.append(((cond == cond.T) * (stril(cond) != 0)).nonzero())
         conds_asym_idx.append(((cond != cond.T) * (cond != 0)).nonzero())
 
@@ -270,7 +270,7 @@ def _calc_para_scale_dat(
         lp_cond = lp_conds[ti] if lp_conds else array([])
         lp_heat = lp_heats[ti] if lp_heats else array([])
         # Sum of capacities, conductances and heat flows each drawn with equal total volume
-        cond_glob, heat_glob = res.net_conds[ti], res.net_heats[ti]
+        cond_glob, heat_glob = res.net_conds.vix[ti], res.net_heats.vix[ti]
         # Infinite capacities get average volume symbols
         capys_inf[ti] = mean(
             hstack((capy_glob[capys_ord_idx[ti]], part_capys, lp_capy))
@@ -412,8 +412,8 @@ def params(
     font_size, small_line, thick_line = pp._adjust_drawings_to_screen_dpi(dpi)
 
     ti = aabs(res_data.times - time).argmin()  # nearest result index for given time
-    net_cond = res_data.net_conds[ti]
-    net_heat = res_data.net_heats[ti]
+    net_cond = res_data.net_conds.vix[ti]
+    net_heat = res_data.net_heats.vix[ti]
     net_capy = res_data.net_capys[ti]
     net_temp = res_data.net_temps[ti]
     net_hsrc = res_data.net_heat_srcs[ti]
