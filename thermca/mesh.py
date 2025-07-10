@@ -1,5 +1,6 @@
 import pathlib
 import warnings
+from collections import defaultdict
 from textwrap import indent
 import pprint
 from functools import wraps
@@ -393,7 +394,9 @@ class Mesh:
         ):
             cell_count = len(cells)
             cell_block_idxs = full(cell_count, i, dtype=int64)
-            cell_set_idxs = arange(curr_cell_idx, curr_cell_idx + cell_count, dtype=int64)
+            cell_set_idxs = arange(
+                curr_cell_idx, curr_cell_idx + cell_count, dtype=int64
+            )
             cell_sets[name] = [cell_set_idxs]
             curr_cell_idx += cell_count
             if block_type == TRIANGLE:
@@ -550,11 +553,19 @@ class Mesh:
                             cell_tags.get(tag, f'noname{len(cell_blocks)}')
                         )
                         block_types.append(cell_type)
+        # Merge blocks with the same name
+        merged_cell_blocks = defaultdict(list)
+        merged_block_types = {}
+        for cell_block, block_type, block_name in zip(
+            cell_blocks, block_types, block_names
+        ):
+            merged_cell_blocks[block_name].extend(cell_block)
+            merged_block_types[block_name] = block_type
         return (
             asarray(io_mesh.points, dtype=float64),
-            cell_blocks,
-            block_types,
-            block_names,
+            merged_cell_blocks.values(),
+            merged_block_types.values(),
+            merged_cell_blocks.keys(),
         )
 
     @staticmethod
@@ -626,3 +637,9 @@ class Mesh:
                 indent(pprint.pformat(self.block_names), "        ") + ")",
             ]
         return '\n'.join(lines)
+
+
+if __name__ == "__main__":
+    mesh = Mesh.read(
+        "/Users/schroeder/Thermca/docs/examples/raspi_compute_module_4.gmsh"
+    )
