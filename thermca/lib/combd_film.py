@@ -54,20 +54,26 @@ def mix_conv(film0, film1, flow=ASSISTING):
         )
 
     def mix_film_func_func(surf_temp, fluid_temp, fluid):
-        return abs(operator_func(
-            film0(surf_temp, fluid_temp, fluid) ** exponent,
-            film1(surf_temp, fluid_temp, fluid) ** exponent,
-        )) ** (1 / exponent)
+        return abs(
+            operator_func(
+                film0(surf_temp, fluid_temp, fluid) ** exponent,
+                film1(surf_temp, fluid_temp, fluid) ** exponent,
+            )
+        ) ** (1 / exponent)
 
     def mix_film_func_scalar(surf_temp, fluid_temp, fluid):
-        return abs(operator_func(
-            film0(surf_temp, fluid_temp, fluid) ** exponent, film1**exponent
-        )) ** (1 / exponent)
+        return abs(
+            operator_func(
+                film0(surf_temp, fluid_temp, fluid) ** exponent, film1**exponent
+            )
+        ) ** (1 / exponent)
 
     def mix_film_scalar_func(surf_temp, fluid_temp, fluid):
-        return abs(operator_func(
-            film0**exponent, film1(surf_temp, fluid_temp, fluid) ** exponent
-        )) ** (1 / exponent)
+        return abs(
+            operator_func(
+                film0**exponent, film1(surf_temp, fluid_temp, fluid) ** exponent
+            )
+        ) ** (1 / exponent)
 
     if callable(film0):
         if callable(film1):
@@ -88,8 +94,8 @@ def conv_radn_room_at_room_temps(
     surf_temp,
     surroundings_temp,
     fluid=None,  # for convenient use
-    emis_coef=.95,
-    factor=1.,
+    emis_coef=0.95,
+    factor=1.0,
 ):
     """Heat exchange between a surface and surrounding room at room
     temperatures.
@@ -124,8 +130,8 @@ def conv_radn_room_at_room_temps(
         Film coefficients
     """
     return (
-        emis_coef * (.8 * 1e8 * 5.6703e-8)  # radiation
-        + (1.7 * 1.3) * abs(surf_temp - surroundings_temp) ** .33  # convection
+        emis_coef * (0.8 * 1e8 * 5.6703e-8)  # radiation
+        + (1.7 * 1.3) * abs(surf_temp - surroundings_temp) ** 0.33  # convection
     ) * factor
 
 
@@ -134,8 +140,8 @@ def conv_radn_room(
     surf_temp,
     surroundings_temp,
     fluid=None,  # for convenient use
-    emis_coef=.95,
-    factor=1.,
+    emis_coef=0.95,
+    factor=1.0,
 ):
     """Heat exchange between a surface and surrounding room.
 
@@ -171,6 +177,60 @@ def conv_radn_room(
     # CPython constant folding: expression parts with side by side standing constant
     # numbers are preevaluated by the byte code compiler
     return (
-        emis_coef * (.8 * 5.6703e-8 * 4.) * ((surf_temp + surroundings_temp) / 2 + 273.15) ** 3  # Radiation
-        + (1.7 * 1.3) * abs(surf_temp - surroundings_temp) ** .33  # Free and forced convection
+        emis_coef
+        * (0.8 * 5.6703e-8 * 4.0)
+        * ((surf_temp + surroundings_temp) / 2 + 273.15) ** 3  # Radiation
+        + (1.7 * 1.3)
+        * abs(surf_temp - surroundings_temp) ** 0.33  # Free and forced convection
+    ) * factor
+
+
+@curry
+def free_conv_radn_plate_in_air(
+    surf_temp,
+    surroundings_temp,
+    fluid=None,  # for convenient use
+    lgth=0.5,
+    emis_coef=0.95,
+    factor=1.0,
+):
+    """Free convection and radiation on a plate in air
+
+    The formula calculates the film coefficient for free convection
+    and radiation on a plate in air where the temperature of
+    surrounding air and surrounding surfaces in radiation exchange are
+    approximately the same.
+    The formula for free convection on a plate in air uses a modified
+    formula from Robert E. Simons [Sim01]_ where mean values of
+    coefficients of horizontal and vertical orientation with the heated
+    side up are used. On a 100 mm square plate heated to 30 to 70°C,
+    it predicts the horizontal plate with the heated side up with very
+    small deviations and underpredicts the vertical plate up to about
+    10 %.
+    The radiation formula uses a temperature dependent approximation
+    that is very good with temperatures in the range of 0°C to 40°C and
+    has small deviations from 40°C to 100°C. The resulting emissivity
+    of the surface and the surrounding surfaces is assumed as the
+    factor of the two emissivities, with surroundings at .8. This
+    approximation is very good with small and high emissivities. This
+    fits the real world, because typically either small or high
+    emissivities occur.
+
+    Args:
+        surf_temp: Plate surface temperature
+        surroundings_temp: Temperature of surrounding air and
+            surrounding surfaces in radiation exchange
+        fluid: Not used
+        lgth: Height or length of plate
+        emis_coef: Emission coefficient of the plate surface
+        factor: Factor by which the result gets multiplied
+
+    Returns:
+        Film coefficients
+    """
+    return (
+        emis_coef
+        * (0.8 * 5.6703e-8 * 4.0)
+        * ((surf_temp + surroundings_temp) / 2 + 273.15) ** 3  # Radiation
+        + 1.37 * (abs(surf_temp - surroundings_temp) / lgth) ** 0.25  # Free convection
     ) * factor

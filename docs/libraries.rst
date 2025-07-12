@@ -105,6 +105,9 @@ References
     Wälzlagern, 2013
 ..  [Sch93] Schäfer, G.: Wärmedurchgangszahl für Kugellager.
     Firmenschrift 10012 3D FAG Kugelfischer 1993
+..  [Sim01] Simons, R. E., 2001. Simplified Formula for Estimating
+    Natural Convection Heat Transfer Coefficient on a Flat Plate,
+    https://www.electronics-cooling.com/2001/08/simplified-formula-for-estimating-natural-convection-heat-transfer-coefficient-on-a-flat-plate/
 ..  [SKF06] SKF rolling bearing catalogue 2006
 ..  [VDI10] VDI Heat Atlas 2010. 2nd edn, Springer
 ..  [VDI13] VDI Wärmeatlas 2013. 11. Auflage, Springer
