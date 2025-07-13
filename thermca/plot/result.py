@@ -295,7 +295,7 @@ def _calc_para_scale_dat(
         heats_sum[ti] = (
             sum(abs(heat_sym[cond_inf_mask]))
             + sum(hsrc[heat_srcs_idx[ti]])
-            + sum(lp_heat)
+            + sum(abs(lp_heat))
         )
         # Reference: 1/3 of total volume for capacity symbols
         capys[ti] = symbol_volus[ti] / 3.0 / capys_sum[ti]
