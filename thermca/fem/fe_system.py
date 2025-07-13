@@ -36,6 +36,7 @@ class Surf:
 
 class FESystem:
     """Creates a FEM system from part meshes
+
     It takes one tetrahedron body mesh and multiple surface meshes as
     interfaces for heat exchange. The meshes have to share the same
     point locations.
@@ -47,6 +48,7 @@ class FESystem:
         matl: Material
         lump_cond_meth: Method to calculate lumped parameters
         temp_dependent: Temperature dependent material
+        name: Name for debugging
 
     Attributes:
         C_surf: Output matrix of IO-system to get the mean coupling
@@ -62,10 +64,12 @@ class FESystem:
         matl: Solid,
         lump_cond_meth,
         temp_dependent,
+        name: str = '',
     ):
         self.init_temp = init_temp
         self.matl = matl
         self.surf_names = surf_meshes.block_names
+        self.name = name
         # self.surf_to_idx = {name: idx for idx, name in enumerate(self.surf_names)}
         # use: self.surf_names.index(surf_name) instead
 

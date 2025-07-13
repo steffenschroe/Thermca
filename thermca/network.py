@@ -157,13 +157,17 @@ class Network:
                 part.matl,
                 part.lump_cond_meth,
                 part.temp_dependent,
+                part.name,
             )
             for part in fe_parts
         ]
         # lp_parts
         lp_parts = model._get_all_elems_of_types(LPPart)
         self._lp_parts = lp_parts
-        lp_syss = [LPSystem(part.asm, part.init_temp, part.matl) for part in lp_parts]
+        lp_syss = [
+            LPSystem(part.asm, part.init_temp, part.matl, part.name)
+            for part in lp_parts
+        ]
 
         self._sim_timer = None
         self._solve_speed = 0.0

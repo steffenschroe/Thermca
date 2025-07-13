@@ -9,14 +9,14 @@ from thermca.lpm.asm import Surf
 
 def block(
     matl,
-    init_temp: float = 0.,
-    width: float = 1.,
-    hgt: float = 1.,
-    depth: float = 1.,
+    init_temp: float = 0.0,
+    width: float = 1.0,
+    hgt: float = 1.0,
+    depth: float = 1.0,
     width_div: int = 1,
     hgt_div: int = 1,
     depth_div: int = 1,
-    posn: tuple[float, float, float] = (0., 0., 0.),
+    posn: tuple[float, float, float] = (0.0, 0.0, 0.0),
     name: str = '',
 ):
     """Creates a block with surfaces 'left', 'right', 'btm', 'top', 'back, 'front'."""
@@ -37,22 +37,22 @@ def block(
         matl=matl,
         init_temp=init_temp,
         posn=posn,
-        name='block',
+        name=name,
     )
     return block_part
 
 
 def pipe(
-        matl,
-        init_temp: float = 0.,
-        lgth: float = 1.,
-        inner_rad: float = .2,
-        outer_rad: float = .25,
-        lgth_div: int = 1,
-        rad_div: int = 1,
-        posn: tuple[float, float, float] = (0., 0., 0.),
-        rad_div_mode: str = EQUAL_VOL,
-        name: str = ''
+    matl,
+    init_temp: float = 0.0,
+    lgth: float = 1.0,
+    inner_rad: float = 0.2,
+    outer_rad: float = 0.25,
+    lgth_div: int = 1,
+    rad_div: int = 1,
+    posn: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    rad_div_mode: str = EQUAL_VOL,
+    name: str = '',
 ):
     """Creates a pipe with surfaces 'base', 'end', 'outer', 'inner'."""
     with Asm() as asm:
@@ -69,35 +69,35 @@ def pipe(
         Surf(name='base', faces=[cyl_rod.face.base])
         Surf(name='end', faces=[cyl_rod.face.end])
         Surf(name='outer', faces=[cyl_rod.face.outer])
-        if inner_rad > 0.:
+        if inner_rad > 0.0:
             Surf(name='inner', faces=[cyl_rod.face.inner])
 
     rod_part = LPPart(
         asm=asm,
         matl=matl,
         init_temp=init_temp,
-        name='rod',
+        name=name,
     )
     return rod_part
 
 
 def rod(
     matl,
-    init_temp: float = 0.,
-    lgth: float = 1.,
-    outer_rad: float = .25,
+    init_temp: float = 0.0,
+    lgth: float = 1.0,
+    outer_rad: float = 0.25,
     lgth_div: int = 1,
     rad_div: int = 1,
-    posn: tuple[float, float, float] = (0., 0., 0.),
+    posn: tuple[float, float, float] = (0.0, 0.0, 0.0),
     rad_div_mode: str = EQUAL_VOL,
-    name: str = ''
+    name: str = '',
 ):
     """Creates a round rod with surfaces 'base', 'end', 'outer'."""
     return pipe(
         matl=matl,
         init_temp=init_temp,
         lgth=lgth,
-        inner_rad=0.,
+        inner_rad=0.0,
         outer_rad=outer_rad,
         lgth_div=lgth_div,
         rad_div=rad_div,
@@ -105,8 +105,3 @@ def rod(
         rad_div_mode=rad_div_mode,
         name=name,
     )
-
-
-
-
-

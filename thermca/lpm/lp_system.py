@@ -21,6 +21,12 @@ class LPSystem:
     """Creates an LPM part system from lp assemblies
 
     The same approach as in 'FESystem' is used
+
+    Args:
+        asm: Lumped parameter assembly
+        init_temp: Initial temperature
+        matl: Material
+        name: Name for debugging
     """
 
     def __init__(
@@ -28,6 +34,7 @@ class LPSystem:
         asm: Asm,
         init_temp: float,
         matl: Solid,
+        name: str = '',
     ):
         (
             Mx_diag,
@@ -46,6 +53,7 @@ class LPSystem:
         self.asm = asm
         self.init_temp = init_temp
         self.matl = matl
+        self.name = name
 
         self.surf_names = surf_names
         self.posns = posns
