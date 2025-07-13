@@ -950,8 +950,8 @@ def params(
         conn_pts = part_link_posns[part_link_conns]
         pcond_dirn = conn_pts[:, 1] - conn_pts[:, 0]
         # When points overlay each other --> dirn. == [0, 0, 0]
-        # To give a direction and prevent division by zero set dirn. to [1, 0, 0]
-        pcond_dirn[(pcond_dirn == 0.0).all(axis=1), :] = array([1.0, 0.0, 0.0])
+        # To give a direction and prevent division by zero set dirn. to [1e-15, 0, 0]
+        pcond_dirn[(pcond_dirn == 0.0).all(axis=1), :] = array([1e-15, 0.0, 0.0])
         conn_lgth = sqrt((pcond_dirn * pcond_dirn).sum(axis=1))  # node-node direction
         part_cond_dirn = pcond_dirn / conn_lgth[:, None]
         part_cond_rad = calc_cond_rad(part_conds * cond_scale)
