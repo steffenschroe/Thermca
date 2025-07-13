@@ -13,20 +13,18 @@ from thermca.lpm.lp_link_surf import LPFace
 
 class LPLeft(LPFace):
     def center(self):
-        return array([0., self.body.hgt / 2., self.body.depth / 2.])
+        return array([0.0, self.body.hgt / 2.0, self.body.depth / 2.0])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([-1., 0., 0.])
+        return array([-1.0, 0.0, 0.0])
 
     def verts(self):
         hgt, depth = self.body.hgt, self.body.depth
         return array(
-            [[0., 0., 0., 0.],
-             [0., 0., hgt, hgt],
-             [0., depth, depth, 0.]]
+            [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, hgt, hgt], [0.0, depth, depth, 0.0]]
         ).T
 
     def body_marg_node_idxs(self):
@@ -34,7 +32,7 @@ class LPLeft(LPFace):
 
     def node_lctns(self):
         body = self.body
-        lctns = zeros((body.depth_div*body.hgt_div, 3))
+        lctns = zeros((body.depth_div * body.hgt_div, 3))
         node_lctns_2d = lctns.reshape((body.depth_div, body.hgt_div, 3))
         for zi in range(body.depth_div):
             # node_lctns_2d[zi, :, 0] = 0.
@@ -47,7 +45,7 @@ class LPLeft(LPFace):
         return tile(
             (body.y_borders()[1:] - body.y_borders()[:-1])
             * (body.z_borders()[1] - body.z_borders()[0]),
-            body.depth_div
+            body.depth_div,
         )
 
     def node_geras(self):
@@ -57,20 +55,22 @@ class LPLeft(LPFace):
 
 class LPRight(LPFace):
     def center(self):
-        return array([self.body.width,  self.body.hgt / 2.,  self.body.depth / 2.])
+        return array([self.body.width, self.body.hgt / 2.0, self.body.depth / 2.0])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([1., 0., 0.])
+        return array([1.0, 0.0, 0.0])
 
     def verts(self):
         width, hgt, depth = self.body.width, self.body.hgt, self.body.depth
         return array(
-            [[width, width, width, width],
-             [0., 0., hgt, hgt],
-             [0., depth, depth, 0.]]
+            [
+                [width, width, width, width],
+                [0.0, 0.0, hgt, hgt],
+                [0.0, depth, depth, 0.0],
+            ]
         ).T
 
     def body_marg_node_idxs(self):
@@ -95,20 +95,18 @@ class LPRight(LPFace):
 
 class LPBtm(LPFace):
     def center(self):
-        return array([self.body.width/2., 0.,  self.body.depth/2.])
+        return array([self.body.width / 2.0, 0.0, self.body.depth / 2.0])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([0., -1., 0.])
+        return array([0.0, -1.0, 0.0])
 
     def verts(self):
         width, depth = self.body.width, self.body.depth
         return array(
-            [[0., 0., width, width],
-             [0., 0.,  0., 0.],
-             [0., depth,  depth, 0.]]
+            [[0.0, 0.0, width, width], [0.0, 0.0, 0.0, 0.0], [0.0, depth, depth, 0.0]]
         ).T
 
     def body_marg_node_idxs(self):
@@ -129,7 +127,7 @@ class LPBtm(LPFace):
         return tile(
             (body.x_borders()[1:] - body.x_borders()[:-1])
             * (body.z_borders()[1] - body.z_borders()[0]),
-            body.depth_div
+            body.depth_div,
         )
 
     def node_geras(self):
@@ -139,20 +137,18 @@ class LPBtm(LPFace):
 
 class LPTop(LPFace):
     def center(self):
-        return array([self.body.width/2., self.body.hgt, self.body.depth/2.])
+        return array([self.body.width / 2.0, self.body.hgt, self.body.depth / 2.0])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([0., 1., 0.])
+        return array([0.0, 1.0, 0.0])
 
     def verts(self):
         width, hgt, depth = self.body.width, self.body.hgt, self.body.depth
         return array(
-            [[0., 0., width, width],
-             [hgt, hgt,  hgt, hgt],
-             [0., depth,  depth, 0.]]
+            [[0.0, 0.0, width, width], [hgt, hgt, hgt, hgt], [0.0, depth, depth, 0.0]]
         ).T
 
     def body_marg_node_idxs(self):
@@ -177,20 +173,18 @@ class LPTop(LPFace):
 
 class LPBack(LPFace):
     def center(self):
-        return array([self.body.width/2., self.body.hgt/2., 0.])
+        return array([self.body.width / 2.0, self.body.hgt / 2.0, 0.0])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([0., 0., -1.])
+        return array([0.0, 0.0, -1.0])
 
     def verts(self):
         width, hgt, depth = self.body.width, self.body.hgt, self.body.depth
         return array(
-            [[0., 0., width, width],
-             [0., hgt, hgt, 0.],
-             [0., 0., 0., 0.]]
+            [[0.0, 0.0, width, width], [0.0, hgt, hgt, 0.0], [0.0, 0.0, 0.0, 0.0]]
         ).T
 
     def body_marg_node_idxs(self):
@@ -203,7 +197,7 @@ class LPBack(LPFace):
         for yi in range(body.hgt_div):
             node_lctns_2d[yi, :, 0] = body.x_node_lctns()[:]
             node_lctns_2d[yi, :, 1] = body.y_node_lctns()[yi]
-            node_lctns_2d[yi, :, 2] = body.z_borders()[-1]
+            # node_lctns_2d[yi, :, 2] = self._z.border[0]
         return lctns
 
     def node_areas(self):
@@ -211,7 +205,7 @@ class LPBack(LPFace):
         return tile(
             (body.x_borders()[1:] - body.x_borders()[:-1])
             * (body.y_borders()[1] - body.y_borders()[0]),
-            body.hgt_div
+            body.hgt_div,
         )
 
     def node_geras(self):
@@ -221,20 +215,22 @@ class LPBack(LPFace):
 
 class LPFront(LPFace):
     def center(self):
-        return array([self.body.width/2., self.body.hgt/2., self.body.depth])
+        return array([self.body.width / 2.0, self.body.hgt / 2.0, self.body.depth])
 
     def dock_lctn(self):
         return self.center()
 
     def dock_dirn(self):
-        return array([0., 0., 1.])
+        return array([0.0, 0.0, 1.0])
 
     def verts(self):
         width, hgt, depth = self.body.width, self.body.hgt, self.body.depth
         return array(
-            [[0., 0., width, width],
-             [0., hgt, hgt, 0.],
-             [depth, depth, depth, depth]]
+            [
+                [0.0, 0.0, width, width],
+                [0.0, hgt, hgt, 0.0],
+                [depth, depth, depth, depth],
+            ]
         ).T
 
     def body_marg_node_idxs(self):
@@ -247,7 +243,8 @@ class LPFront(LPFace):
         for yi in range(body.hgt_div):
             node_lctns_2d[yi, :, 0] = body.x_node_lctns()[:]
             node_lctns_2d[yi, :, 1] = body.y_node_lctns()[yi]
-            # node_lctns_2d[yi, :, 2] = self._z.border[0]
+            node_lctns_2d[yi, :, 2] = body.z_borders()[-1]
+
         return lctns
 
     def node_areas(self):
@@ -303,24 +300,24 @@ class LPCube:
 
     def x_borders(self):
         """Local x-coordinates of sub-cube borders"""
-        return get_border_lctns(0., self.width, self.width_div)
+        return get_border_lctns(0.0, self.width, self.width_div)
 
     def y_borders(self):
         """Local y-coordinates of sub-cube borders"""
-        return get_border_lctns(0., self.hgt, self.hgt_div)
+        return get_border_lctns(0.0, self.hgt, self.hgt_div)
 
     def z_borders(self):
         """Local z-coordinates of sub-cube borders"""
-        return get_border_lctns(0., self.depth, self.depth_div)
+        return get_border_lctns(0.0, self.depth, self.depth_div)
 
     def x_node_lctns(self):
-        return get_node_lctns(0., self.width, self.width_div)
+        return get_node_lctns(0.0, self.width, self.width_div)
 
     def y_node_lctns(self):
-        return get_node_lctns(0., self.hgt, self.hgt_div)
+        return get_node_lctns(0.0, self.hgt, self.hgt_div)
 
     def z_node_lctns(self):
-        return get_node_lctns(0., self.depth, self.depth_div)
+        return get_node_lctns(0.0, self.depth, self.depth_div)
 
     def center(self):
         """Local center for plot purposes"""
@@ -337,7 +334,9 @@ class LPCube:
 
     def node_idxs_3d(self):
         # return self.node_idxs().reshape((self.depth_div, self.hgt_div, self.width_div))
-        return arange(self.node_count(), dtype=int64).reshape((self.depth_div, self.hgt_div, self.width_div))
+        return arange(self.node_count(), dtype=int64).reshape(
+            (self.depth_div, self.hgt_div, self.width_div)
+        )
 
     def node_vols(self):
         return full(self.node_count(), self.vol() / self.node_count())
@@ -354,35 +353,52 @@ class LPCube:
 
     def node_geras(self):
         xdivs, ydivs, zdivs = self.width_div, self.hgt_div, self.depth_div
-        x_node, y_node, z_node = self.x_node_lctns(), self.y_node_lctns(), self.z_node_lctns()
-        x_border, y_border, z_border = self.x_borders(), self.y_borders(), self.z_borders()
-        gera6d = DOK((zdivs, ydivs, xdivs, zdivs, ydivs, xdivs))  # Make it accessible over axes-indices
-        data6d = gera6d.data  # Speed up DOK.__setitem__, because there are many costly checks
+        x_node, y_node, z_node = (
+            self.x_node_lctns(),
+            self.y_node_lctns(),
+            self.z_node_lctns(),
+        )
+        x_border, y_border, z_border = (
+            self.x_borders(),
+            self.y_borders(),
+            self.z_borders(),
+        )
+        gera6d = DOK(
+            (zdivs, ydivs, xdivs, zdivs, ydivs, xdivs)
+        )  # Make it accessible over axes-indices
+        data6d = (
+            gera6d.data
+        )  # Speed up DOK.__setitem__, because there are many costly checks
         # Geometric ratios for conductances in x-direction
         for zi in range(zdivs):
             for yi in range(ydivs):
                 for xi in range(xdivs - 1):
                     data6d[(zi, yi, xi, zi, yi, xi + 1)] = (
-                        (y_border[yi + 1] - y_border[yi]) *
-                        (z_border[zi + 1] - z_border[zi]) /
-                        (x_node[xi + 1] - x_node[xi]))
+                        (y_border[yi + 1] - y_border[yi])
+                        * (z_border[zi + 1] - z_border[zi])
+                        / (x_node[xi + 1] - x_node[xi])
+                    )
         # Geometric ratios for conductances in y-direction
         for zi in range(zdivs):
             for yi in range(ydivs - 1):
                 for xi in range(xdivs):
                     data6d[(zi, yi, xi, zi, yi + 1, xi)] = (
-                        (x_border[xi + 1] - x_border[xi]) *
-                        (z_border[zi + 1] - z_border[zi]) /
-                        (y_node[yi + 1] - y_node[yi]))
+                        (x_border[xi + 1] - x_border[xi])
+                        * (z_border[zi + 1] - z_border[zi])
+                        / (y_node[yi + 1] - y_node[yi])
+                    )
         # Geometric ratios for conductances in z-direction
         for zi in range(zdivs - 1):
             for yi in range(ydivs):
                 for xi in range(xdivs):
                     data6d[(zi, yi, xi, zi + 1, yi, xi)] = (
-                            (x_border[xi + 1] - x_border[xi])*
-                            (y_border[yi + 1] - y_border[yi])/
-                            (z_node[zi + 1] - z_node[zi]))
-        gera2d = gera6d.to_coo().reshape((ydivs*xdivs*zdivs, ydivs*xdivs*zdivs))  # Reshape is only supported by COO
+                        (x_border[xi + 1] - x_border[xi])
+                        * (y_border[yi + 1] - y_border[yi])
+                        / (z_node[zi + 1] - z_node[zi])
+                    )
+        gera2d = gera6d.to_coo().reshape(
+            (ydivs * xdivs * zdivs, ydivs * xdivs * zdivs)
+        )  # Reshape is only supported by COO
         gera2d = DOK.from_coo(gera2d)
         data = gera2d.data
         # Mirror along diagonal
@@ -395,8 +411,7 @@ class LPCube:
         A 2dimensional array where the first row contains the minimum values in each dimension
         and the second row contains the maximum values."""
         p, w, h, d = self.posn, self.width, self.hgt, self.depth
-        return array([p,
-                     [p[0]+w, p[1]+h, p[2]+d]])         
+        return array([p, [p[0] + w, p[1] + h, p[2] + d]])
 
     def __hash__(self):
         return id(self)
