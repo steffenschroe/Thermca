@@ -49,63 +49,63 @@ AREA = 'area'
 EDGE = 'edge'
 
 tab10_colors = [
-    (.121, .4648, .7031),
-    (.996, .496, .0546),
-    (.1718, .625, .1718),
-    (.8359, .1523, .1562),
-    (.5781, .4023, .7382),
-    (.5468, .3359, .2929),
-    (.8867, .4648, .7578),
-    (.496, .496, .496),
-    (.7343, .7382, .1328),
-    (.0898, .7421, .8085),
+    (0.121, 0.4648, 0.7031),
+    (0.996, 0.496, 0.0546),
+    (0.1718, 0.625, 0.1718),
+    (0.8359, 0.1523, 0.1562),
+    (0.5781, 0.4023, 0.7382),
+    (0.5468, 0.3359, 0.2929),
+    (0.8867, 0.4648, 0.7578),
+    (0.4805, 0.637, 0.1572),  # Grey replaced by earthy green color
+    (0.7343, 0.7382, 0.1328),
+    (0.0898, 0.7421, 0.8085),
 ]
 
-dark_tab10_colors = array(tab10_colors) * .7
+dark_tab10_colors = array(tab10_colors) * 0.7
 
 
 color_themes = {
     DEFAULT: {
-        'bg': (.5, .5, .5),
-        'fg': (1., 1., 1.),
-        'text_bg': (0., 0., 0.),
+        'bg': (0.5, 0.5, 0.5),
+        'fg': (1.0, 1.0, 1.0),
+        'text_bg': (0.0, 0.0, 0.0),
         # params
-        'temp_clamp': (.3, .3, .3),
-        'cond_line': (.8, .8, .8),
-        'cond_cyl': (.3, .3, .3),
-        'heat_cone': (1., 1., 1.),
-        'heat_cone_stripe': (.3, .3, .3),
-        'forced_heat': (.9, .9, .9),
+        'temp_clamp': (0.3, 0.3, 0.3),
+        'cond_line': (0.8, 0.8, 0.8),
+        'cond_cyl': (0.3, 0.3, 0.3),
+        'heat_cone': (1.0, 1.0, 1.0),
+        'heat_cone_stripe': (0.3, 0.3, 0.3),
+        'forced_heat': (0.9, 0.9, 0.9),
         # elements
-        'edge': (1., 1., 1.),
-        'subdiv': (.6, .6, .6),
-        'symm': (1., 1., 1.),
-        'link': (.2, .2, .2),
+        'edge': (1.0, 1.0, 1.0),
+        'subdiv': (0.6, 0.6, 0.6),
+        'symm': (1.0, 1.0, 1.0),
+        'link': (0.2, 0.2, 0.2),
         # mesh
-        'body_edges': (.6, .6, .6),
-        'body_text': (.8, .8, .8),
-        'isfc': (.3, .3, .3),
+        'body_edges': (0.6, 0.6, 0.6),
+        'body_text': (0.8, 0.8, 0.8),
+        'isfc': (0.3, 0.3, 0.3),
     },
     BRIGHT: {
-        'bg': (1., 1., 1.),
-        'fg': (0., 0., 0.),
-        'text_bg': (.8, .8, .8),
+        'bg': (1.0, 1.0, 1.0),
+        'fg': (0.0, 0.0, 0.0),
+        'text_bg': (0.8, 0.8, 0.8),
         # params
-        'temp_clamp': (.3, .3, .3),
-        'cond_line': (.2, .2, .2),
-        'cond_cyl': (.5, .5, .5),
-        'heat_cone': (.8, .8, .8),
-        'heat_cone_stripe': (.2, .2, .2),
-        'forced_heat': (.1, .1, .1),
+        'temp_clamp': (0.3, 0.3, 0.3),
+        'cond_line': (0.2, 0.2, 0.2),
+        'cond_cyl': (0.5, 0.5, 0.5),
+        'heat_cone': (0.8, 0.8, 0.8),
+        'heat_cone_stripe': (0.2, 0.2, 0.2),
+        'forced_heat': (0.1, 0.1, 0.1),
         # elements
-        'edge': (0., 0., 0.),
-        'subdiv': (.8, .8, .8),
-        'symm': (0., 0., 0.),
-        'link': (.2, .2, .2),
+        'edge': (0.0, 0.0, 0.0),
+        'subdiv': (0.8, 0.8, 0.8),
+        'symm': (0.0, 0.0, 0.0),
+        'link': (0.2, 0.2, 0.2),
         # mesh
-        'body_edges': (.8, .8, .8),
-        'body_text': (.2, .2, .2),
-        'isfc': (.3, .3, .3),
+        'body_edges': (0.8, 0.8, 0.8),
+        'body_text': (0.2, 0.2, 0.2),
+        'isfc': (0.3, 0.3, 0.3),
     },
 }
 
@@ -150,13 +150,13 @@ def axes(color, font_size, use_2d, plotter):
     axes.SetFlyModeToClosestTriad()
     # axes.SetNumberOfLabels(2)
     # axes.SetFlyModeToOuterEdges()
-    axes.SetCornerOffset(0.)
+    axes.SetCornerOffset(0.0)
     # axes.UseRangesOn()
     # axes.UseBoundsOn()
     axes.ScalingOff()
     if use_2d:
         axes.ZAxisVisibilityOff()
-    axes.SetFontFactor(1.)  #
+    axes.SetFontFactor(1.0)  #
 
     tprop = vtk.vtkTextProperty()
     tprop.SetColor(color)
@@ -300,7 +300,7 @@ def scaled_spheres(
         return
     point_mesh = pv.PolyData(posns)
     # Scalars given as diameter seems to work but documentation suggests radius
-    point_mesh.point_data['radii'] = radii * 2.
+    point_mesh.point_data['radii'] = radii * 2.0
 
     sphere = vtk.vtkSphereSource()
     sphere.SetThetaResolution(20)
@@ -340,7 +340,7 @@ def glowing_scaled_spheres(
     # sphere radius as norm of vector
     zero_lgths = zeros_like(radii)
     # Vectors given as diameter seems to work but documentation suggests radius
-    point_mesh.point_data['radii'] = column_stack((radii * 2., zero_lgths, zero_lgths))
+    point_mesh.point_data['radii'] = column_stack((radii * 2.0, zero_lgths, zero_lgths))
     point_mesh.set_active_vectors('radii')
 
     point_mesh.point_data['colors'] = color_intsts
@@ -371,14 +371,14 @@ def glowing_scaled_spheres(
 
 
 def color_bar(title: str, font_size: float, clim: tuple[float, float], plotter):
-    point_mesh = pv.PolyData(array([[0., 0., 0.]]))
-    point_mesh.point_data[title] = array([0.])
+    point_mesh = pv.PolyData(array([[0.0, 0.0, 0.0]]))
+    point_mesh.point_data[title] = array([0.0])
     scalar_bar_args = {
         'vertical': True,
-        'width': .05,
-        'height': .9,
-        'position_x': .92,
-        'position_y': .01,
+        'width': 0.05,
+        'height': 0.9,
+        'position_x': 0.92,
+        'position_y': 0.01,
         # Text
         'title_font_size': font_size,
         'label_font_size': font_size,
@@ -387,7 +387,7 @@ def color_bar(title: str, font_size: float, clim: tuple[float, float], plotter):
         point_mesh,
         cmap="plasma",
         # point_size=0,
-        opacity=0.,
+        opacity=0.0,
         clim=clim,
         scalar_bar_args=scalar_bar_args,
         show_scalar_bar=True,
@@ -570,7 +570,14 @@ def glowing_scaled_tubes(
 
     pv_mesh = _get_output(tube)
     # plotter.add_mesh(pv_mesh, opacity=opacity, scalars='colors', rgb=True)
-    plotter.add_mesh(pv_mesh, clim=clim, opacity=opacity, scalars='colors', cmap="plasma", show_scalar_bar=False)
+    plotter.add_mesh(
+        pv_mesh,
+        clim=clim,
+        opacity=opacity,
+        scalars='colors',
+        cmap="plasma",
+        show_scalar_bar=False,
+    )
 
 
 def triangle_mesh(
@@ -612,9 +619,9 @@ def triangle_mesh(
             line_width=line_width,
             style=style,
             opacity=opacity,
-            ambient=1.,  # prevent color flicker of wireframe lines
-            specular=0.,
-            diffuse=0.,
+            ambient=1.0,  # prevent color flicker of wireframe lines
+            specular=0.0,
+            diffuse=0.0,
         )
     else:
         style = 'surface'
@@ -1008,10 +1015,10 @@ def tube_heat_cones(
     point_count = cone_count * 2
     p = empty((point_count, 3))
     r = empty(point_count)
-    p[0::2] = posns + axes * (lengs * .3)[:, None]
-    p[1::2] = posns + axes * (lengs * .5)[:, None]
-    r[0::2] = radii * .701
-    r[1::2] = radii * .501
+    p[0::2] = posns + axes * (lengs * 0.3)[:, None]
+    p[1::2] = posns + axes * (lengs * 0.5)[:, None]
+    r[0::2] = radii * 0.701
+    r[1::2] = radii * 0.501
     connections = array([arange(0, point_count - 1, 2), arange(1, point_count, 2)]).T
     scaled_tubes(
         p, connections, r, stripe_color, opacity=opacity, capped=True, plotter=plotter
@@ -1027,8 +1034,8 @@ def temp_clamping(
     """Draw 6 cones around the bound temperature capacity sphere"""
     if len(capy_posns) == 0:
         return
-    cone_rad = capy_rads * .4
-    cone_hgt = cone_rad * 1.732 * .5
+    cone_rad = capy_rads * 0.4
+    cone_hgt = cone_rad * 1.732 * 0.5
     ds = array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]])
     p = empty((len(capy_rads) * len(ds), 3))
     axis = empty((len(capy_rads) * len(ds), 3))
@@ -1040,7 +1047,7 @@ def temp_clamping(
         axis[i::6] = tile(-xd, (len(capy_rads), 1))
         rad[i::6] = cone_rad
         hgt[i::6] = cone_hgt
-    tube_cones(p, rad, hgt, axis, color, opacity=1., plotter=plotter)
+    tube_cones(p, rad, hgt, axis, color, opacity=1.0, plotter=plotter)
 
 
 def glowing_temp_clamping(
@@ -1060,7 +1067,7 @@ def glowing_temp_clamping(
     if num_clamps == 0:
         return
     # cone_rad = capy_rads*.4
-    cone_rads = cone_hgts / (1.732 * 2.)
+    cone_rads = cone_hgts / (1.732 * 2.0)
     ds = array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]])
     p = empty((num_clamps * len(ds), 3))
     axis = empty((num_clamps * len(ds), 3))
@@ -1073,7 +1080,7 @@ def glowing_temp_clamping(
         rad[i::6] = cone_rads
         hgt[i::6] = cone_hgts
     glowing_tube_cones(
-        p, rad, hgt, axis, repeat(glows, 6), clim, opacity=1., plotter=plotter
+        p, rad, hgt, axis, repeat(glows, 6), clim, opacity=1.0, plotter=plotter
     )
 
 
@@ -1195,9 +1202,9 @@ def block_face(
         # line_width=10,
         # edge_color=color,
         color=color,
-        ambient=1.,  # prevent color flicker of wireframe lines
-        specular=0.,
-        diffuse=0.,
+        ambient=1.0,  # prevent color flicker of wireframe lines
+        specular=0.0,
+        diffuse=0.0,
     )
 
 
@@ -1229,16 +1236,16 @@ def dock(
 if __name__ == '__main__':
     from thermca import Mesh
 
-    capy_posns = array([[0., 0., 0.], [1., 1., 1.], [4., 1., 1.]])
-    capy_rads = array([1., .5, .2])
+    capy_posns = array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [4.0, 1.0, 1.0]])
+    capy_rads = array([1.0, 0.5, 0.2])
     conns = array([[0, 1], [1, 2]])
-    temps = array([20., 22., 24.])
+    temps = array([20.0, 22.0, 24.0])
     simple_block = Mesh(
         points=array(
             [
-                [.8, .8, .8, .8, 0., 0., 0., 0., .4, .4, .4, .4, .4, .4],
-                [.6, .6, 0., 0., .6, .6, 0., 0., .6, 0., .6, 0., .3, .3],
-                [0., .4, 0., .4, 0., .4, 0., .4, .4, .4, 0., 0., .4, 0.],
+                [0.8, 0.8, 0.8, 0.8, 0.0, 0.0, 0.0, 0.0, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+                [0.6, 0.6, 0.0, 0.0, 0.6, 0.6, 0.0, 0.0, 0.6, 0.0, 0.6, 0.0, 0.3, 0.3],
+                [0.0, 0.4, 0.0, 0.4, 0.0, 0.4, 0.0, 0.4, 0.4, 0.4, 0.0, 0.0, 0.4, 0.0],
             ]
         ).T,
         cell_blocks=[
@@ -1295,11 +1302,11 @@ if __name__ == '__main__':
     # glowing_scaled_tubes(capy_posns, conns, capy_rads, glow=array([.2, .4, .6]), opacity=1., capped=True, plotter=pl)
     glowing_temp_clamping(
         capy_posns,
-        cone_hgts=array([.2, .4, .6]),
-        glows=array([.2, .4, .6]),
+        cone_hgts=array([0.2, 0.4, 0.6]),
+        glows=array([0.2, 0.4, 0.6]),
         plotter=pl,
     )
-    axes(color=(1., 1., 1.), font_size=font_size, use_2d=False, plotter=pl)
+    axes(color=(1.0, 1.0, 1.0), font_size=font_size, use_2d=False, plotter=pl)
     _set_initial_view(pl, draw2d=True)
 
     pl.show()
