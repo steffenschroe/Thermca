@@ -28,7 +28,9 @@ class FEPart(ModelElement):
             temperature dependent properties, the properties will be
             set for the initial temperature of the part.
         init_temp: Initial temperature
-        posn: Origin position with the x, y and z coordinate
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         mor_dof: Controls the degree of freedom (DOF) of the FE-system
             and thus influences its accuracy. If None, a full
             FE-system gets created. Otherwise, a number has to be

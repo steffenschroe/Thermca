@@ -20,7 +20,9 @@ class Node(ModelElement):
 
     Args:
         capy: The thermal capacity of the node
-        posn: Position with the x, y and z coordinates
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         init_temp: Initial temperature of the node
         name: Name of the node
     """
@@ -56,7 +58,9 @@ class BoundNode(ModelElement):
             created using the 'Input' element. The 'get_value' method
             of this element is a compatible function that returns a
             time dependent value.
-        posn: Position with the x, y and z coordinates
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         name: Name of the node
 
     Example:
@@ -102,7 +106,9 @@ class StatNode(ModelElement):
     step size and thus increase simulation time.
 
     Args:
-        posn: Position with the x, y and z coordinates
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         name: Name of the node
     """
 
@@ -141,7 +147,9 @@ class MatlNode(ModelElement):
     Args:
         vol: Volume of the node
         matl: Material of the node
-        posn: Position with the x, y and z coordinates
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         init_temp: Initial temperature of the node
         temp_dependent: Switch for temperature dependent material behavior
         name: Name of the node

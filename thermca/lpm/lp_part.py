@@ -26,7 +26,9 @@ class LPPart(ModelElement):
             temperature dependent properties, the properties will be
             set for the initial temperature of the part.
         init_temp: Initial temperature
-        posn: Origin position with the x, y and z coordinate
+        posn: Origin position with the x, y and z coordinate; The
+            x-axis points to the right, the y-axis points up, and the
+            z-axis points toward the viewer.
         temp_dependent: Switch for temperature dependent material
             behavior
         name: Name of the part.
