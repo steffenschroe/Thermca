@@ -8,6 +8,7 @@ from thermca.resultdata import Result
 from thermca.materials import Solid, Fluid, func_to_table
 from thermca.plot.primitives import NAME, AXES, DEFAULT, BRIGHT
 from thermca.plot.mesh import BODY_POINT_IDX, POINT_IDX
+from thermca.plot.result import EDGE
 # fmt: off
 from thermca.plot.model import (
     LINK, HEAT_SRC_ELEM, CAPY, HEAT, COND, CONN, TEMP, LUMP_NODE_IDX, COLOR_BAR,
@@ -40,7 +41,7 @@ __all__ = [
     'Cube', 'Cyl', 'Asm', 'Surf', 'ForceConts', 'LPPart',
     'lp_parts', 'FEPart', 'Mesh',
     'SFC_TO_CENTER_PLANE', 'SFC_TO_SFC', 'CAPY', 'HEAT', 'COND', 'LINK', 'TEMP',
-    'LUMP_NODE_IDX', 'POINT_IDX', 'BODY_POINT_IDX', 'COLOR_BAR', 'HEAT_SRC',
+    'LUMP_NODE_IDX', 'POINT_IDX', 'BODY_POINT_IDX', 'COLOR_BAR', 'HEAT_SRC', 'EDGE',
     'HEAT_SRC_ELEM', 'NAME', 'AXES', 'CONN', 'VOL', 'AREA', 'DEFAULT', 'BRIGHT',
     'SIM_SPAN', 'POINT_IN_TIME', 'ASSISTING', 'OPPOSING', 'TRANSVERSE', 'SNGL_NUT',
     'DBLE_NUT', 'RK23', 'RK45', 'LSODA',
