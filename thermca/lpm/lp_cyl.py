@@ -45,8 +45,10 @@ class LPBase(LPFace):
 
     def node_geras(self):
         body = self.body
-        return self.node_areas() / (
-            body.axial_node_lctns()[0] - body.axial_borders()[0]
+        return (
+            self.node_areas() / (body.axial_node_lctns()[0] - body.axial_borders()[0]),
+            None,
+            None,
         )
 
 
@@ -114,9 +116,13 @@ class LPInner(LPFace):
     def node_geras(self):
         body = self.body
         return (
-            tau
-            * (body.axial_borders()[1:] - body.axial_borders()[:-1])
-            / log(body.rad_node_lctns()[0] / body.rad_borders()[0])
+            None,
+            (
+                tau
+                * (body.axial_borders()[1:] - body.axial_borders()[:-1])
+                / log(body.rad_node_lctns()[0] / body.rad_borders()[0])
+            ),
+            None,
         )
 
 
@@ -151,9 +157,13 @@ class LPOuter(LPFace):
     def node_geras(self):
         body = self.body
         return (
-            tau
-            * (body.axial_borders()[1:] - body.axial_borders()[:-1])
-            / log(body.rad_borders()[-1] / body.rad_node_lctns()[-1])
+            None,
+            (
+                tau
+                * (body.axial_borders()[1:] - body.axial_borders()[:-1])
+                / log(body.rad_borders()[-1] / body.rad_node_lctns()[-1])
+            ),
+            None,
         )
 
 
@@ -268,17 +278,17 @@ class LPCyl:
         xdivs, ydivs = self.lgth_div, self.rad_div
         x_node, y_node = self.axial_node_lctns(), self.rad_node_lctns()
         x_border, y_border = self.axial_borders(), self.rad_borders()
-        # gera2d = zeros((ydivs*xdivs)**2).reshape(ydivs*xdivs, ydivs*xdivs)
-        gera4d = DOK(
-            (ydivs, xdivs, ydivs, xdivs)
-        )  # Make it accessible over axes-indices
-        data4d = (
-            gera4d.data
-        )  # Speed up DOK.__setitem__, because there are many costly checks
+        # Make it accessible over axes-indices
+        gera4d_x = DOK((ydivs, xdivs, ydivs, xdivs))
+        gera4d_y = DOK((ydivs, xdivs, ydivs, xdivs))
+        # Speed up DOK.__setitem__, because there are many costly checks
+        data4d_x = gera4d_x.data
+        data4d_y = gera4d_x.data
+
         # Geometric ratios for conductances in x-direction
         for yi in range(ydivs):
             for xi in range(xdivs - 1):
-                data4d[(yi, xi, yi, xi + 1)] = (
+                data4d_x[(yi, xi, yi, xi + 1)] = (
                     tau
                     / 2.0
                     * (y_border[yi + 1] ** 2 - y_border[yi] ** 2)
@@ -287,20 +297,28 @@ class LPCyl:
         # Geometric ratios for conductances in y-direction
         for yi in range(ydivs - 1):
             for xi in range(xdivs):
-                data4d[(yi, xi, yi + 1, xi)] = (
+                data4d_y[(yi, xi, yi + 1, xi)] = (
                     tau
                     * (x_border[xi + 1] - x_border[xi])
                     / log(y_node[yi + 1] / y_node[yi])
                 )
-        gera2d = gera4d.to_coo().reshape(
-            (ydivs * xdivs, ydivs * xdivs)
-        )  # Reshape is only supported by COO
-        gera2d = DOK.from_coo(gera2d)
-        data = gera2d.data
+
+        # Reshape is only supported by COO
+        gera2d_x = gera4d_x.to_coo().reshape((ydivs * xdivs, ydivs * xdivs))
+        gera2d_x = DOK.from_coo(gera2d_x)
+        data = gera2d_x.data
         # Mirror along diagonal
         for k, v in list(data.items()):
             data[(k[1], k[0])] = v
-        return gera2d
+
+        gera2d_y = gera4d_y.to_coo().reshape((ydivs * xdivs, ydivs * xdivs))
+        gera2d_y = DOK.from_coo(gera2d_y)
+        data = gera2d_y.data
+        # Mirror along diagonal
+        for k, v in list(data.items()):
+            data[(k[1], k[0])] = v
+
+        return gera2d_x, gera2d_y, DOK((ydivs * xdivs, ydivs * xdivs))
 
     def bounding_box(self):
         """The bounding box of the points of the mesh.
@@ -335,9 +353,7 @@ def get_equal_vol_border_rads(inner_rad, outer_rad, num_div):
     for i in range(1, num_div, 1):
         pir = border_rads[i - 1]  # Previous inner radius
         ndiv = num_div - i + 1  # Reduce divisions
-        border_rads[i] = (
-            ndiv * (ndiv * pir**2 + outer_rad**2 - pir**2)
-        ) ** 0.5 / ndiv
+        border_rads[i] = (ndiv * (ndiv * pir**2 + outer_rad**2 - pir**2)) ** 0.5 / ndiv
     border_rads[num_div] = outer_rad
     return border_rads
 

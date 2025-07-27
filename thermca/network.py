@@ -165,7 +165,9 @@ class Network:
         lp_parts = model._get_all_elems_of_types(LPPart)
         self._lp_parts = lp_parts
         lp_syss = [
-            LPSystem(part.asm, part.init_temp, part.matl, part.name)
+            LPSystem(
+                part.asm, part.init_temp, part.matl, part.name, part.temp_dependent
+            )
             for part in lp_parts
         ]
 

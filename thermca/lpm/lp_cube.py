@@ -50,7 +50,11 @@ class LPLeft(LPFace):
 
     def node_geras(self):
         body = self.body
-        return self.node_areas() / (body.x_node_lctns()[0] - body.x_borders()[0])
+        return (
+            self.node_areas() / (body.x_node_lctns()[0] - body.x_borders()[0]),
+            None,
+            None,
+        )
 
 
 class LPRight(LPFace):
@@ -132,7 +136,11 @@ class LPBtm(LPFace):
 
     def node_geras(self):
         body = self.body
-        return self.node_areas() / (body.y_node_lctns()[0] - body.y_borders()[0])
+        return (
+            None,
+            self.node_areas() / (body.y_node_lctns()[0] - body.y_borders()[0]),
+            None,
+        )
 
 
 class LPTop(LPFace):
@@ -210,7 +218,11 @@ class LPBack(LPFace):
 
     def node_geras(self):
         body = self.body
-        return self.node_areas() / (body.z_node_lctns()[0] - body.z_borders()[0])
+        return (
+            None,
+            None,
+            self.node_areas() / (body.z_node_lctns()[0] - body.z_borders()[0]),
+        )
 
 
 class LPFront(LPFace):
@@ -363,17 +375,20 @@ class LPCube:
             self.y_borders(),
             self.z_borders(),
         )
-        gera6d = DOK(
-            (zdivs, ydivs, xdivs, zdivs, ydivs, xdivs)
-        )  # Make it accessible over axes-indices
-        data6d = (
-            gera6d.data
-        )  # Speed up DOK.__setitem__, because there are many costly checks
+        # Make it accessible over axes-indices
+        gera6d_x = DOK((zdivs, ydivs, xdivs, zdivs, ydivs, xdivs))
+        gera6d_y = DOK((zdivs, ydivs, xdivs, zdivs, ydivs, xdivs))
+        gera6d_z = DOK((zdivs, ydivs, xdivs, zdivs, ydivs, xdivs))
+        # Speed up DOK.__setitem__, because there are many costly checks
+        data6d_x = gera6d_x.data
+        data6d_y = gera6d_y.data
+        data6d_z = gera6d_z.data
+
         # Geometric ratios for conductances in x-direction
         for zi in range(zdivs):
             for yi in range(ydivs):
                 for xi in range(xdivs - 1):
-                    data6d[(zi, yi, xi, zi, yi, xi + 1)] = (
+                    data6d_x[(zi, yi, xi, zi, yi, xi + 1)] = (
                         (y_border[yi + 1] - y_border[yi])
                         * (z_border[zi + 1] - z_border[zi])
                         / (x_node[xi + 1] - x_node[xi])
@@ -382,7 +397,7 @@ class LPCube:
         for zi in range(zdivs):
             for yi in range(ydivs - 1):
                 for xi in range(xdivs):
-                    data6d[(zi, yi, xi, zi, yi + 1, xi)] = (
+                    data6d_y[(zi, yi, xi, zi, yi + 1, xi)] = (
                         (x_border[xi + 1] - x_border[xi])
                         * (z_border[zi + 1] - z_border[zi])
                         / (y_node[yi + 1] - y_node[yi])
@@ -391,20 +406,40 @@ class LPCube:
         for zi in range(zdivs - 1):
             for yi in range(ydivs):
                 for xi in range(xdivs):
-                    data6d[(zi, yi, xi, zi + 1, yi, xi)] = (
+                    data6d_z[(zi, yi, xi, zi + 1, yi, xi)] = (
                         (x_border[xi + 1] - x_border[xi])
                         * (y_border[yi + 1] - y_border[yi])
                         / (z_node[zi + 1] - z_node[zi])
                     )
-        gera2d = gera6d.to_coo().reshape(
+        # Reshape is only supported by COO
+        gera2d_x = gera6d_x.to_coo().reshape(
             (ydivs * xdivs * zdivs, ydivs * xdivs * zdivs)
-        )  # Reshape is only supported by COO
-        gera2d = DOK.from_coo(gera2d)
-        data = gera2d.data
+        )
+        gera2d_x = DOK.from_coo(gera2d_x)
+        data = gera2d_x.data
         # Mirror along diagonal
         for k, v in list(data.items()):
             data[(k[1], k[0])] = v
-        return gera2d
+
+        gera2d_y = gera6d_y.to_coo().reshape(
+            (ydivs * xdivs * zdivs, ydivs * xdivs * zdivs)
+        )
+        gera2d_y = DOK.from_coo(gera2d_y)
+        data = gera2d_y.data
+        # Mirror along diagonal
+        for k, v in list(data.items()):
+            data[(k[1], k[0])] = v
+
+        gera2d_z = gera6d_z.to_coo().reshape(
+            (ydivs * xdivs * zdivs, ydivs * xdivs * zdivs)
+        )
+        gera2d_z = DOK.from_coo(gera2d_z)
+        data = gera2d_z.data
+        # Mirror along diagonal
+        for k, v in list(data.items()):
+            data[(k[1], k[0])] = v
+
+        return gera2d_x, gera2d_y, gera2d_z
 
     def bounding_box(self):
         """The bounding box of the points of the mesh.

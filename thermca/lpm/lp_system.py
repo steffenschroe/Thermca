@@ -34,12 +34,15 @@ class LPSystem:
         asm: Asm,
         init_temp: float,
         matl: Solid,
+        temp_dependent,
         name: str = '',
     ):
         (
             Mx_diag,
             Qs,
-            Lx_base,
+            Lx_x,
+            Lx_y,
+            Lx_z,
             posns,
             surf_names,
             surf_to_marg_idxs,
@@ -48,7 +51,8 @@ class LPSystem:
             vol_sum,
         ) = assemble(asm)
         if dof < 2:
-            Exception("Assembly must have at least 2 sub-volumes!")
+            # Some calculations fail e.g. test_stationary_solution_with_orthotropic_material
+            raise Exception("Assembly must have at least 2 sub-volumes!")
 
         self.asm = asm
         self.init_temp = init_temp
@@ -60,25 +64,47 @@ class LPSystem:
         self.Mx_diag = Mx_diag
         self.M_diag = matl.vol_capy_interp(init_temp) * Mx_diag
 
-        self.Lx_base = Lx_base  # Lx without negated sum of rows on diagonal
+        # Geometry only; only needed for body properties with mean body temperature
+        if dof == 1:  # Add first diagonal entry to the matrix and set to zero
+            L00 = diags([1.0], shape=Lx_x.shape)
+            Lx = Lx_x + Lx_y + Lx_z + L00
+            Lx[0, 0] = 0.0
+        else:
+            Lx = Lx_x + Lx_y + Lx_z
+        if matl._condy is not None:
+            self.L = Lx.copy()
+            self.L.data *= matl.condy_interp(init_temp)
+        if matl._orthotropic_condy is not None:
+            if dof == 1:  # Add first diagonal entry to the matrix and set to zero
+                L00 = diags([1.0], shape=Lx_x.shape)
+                self.L = (
+                    matl._orthotropic_condy[0] * Lx_x
+                    + matl._orthotropic_condy[1] * Lx_y
+                    + matl._orthotropic_condy[2] * Lx_z
+                    + L00
+                )
+                self.L[0, 0] = 0.0
+            else:
+                self.L = (
+                    matl._orthotropic_condy[0] * Lx_x
+                    + matl._orthotropic_condy[1] * Lx_y
+                    + matl._orthotropic_condy[2] * Lx_z
+                )
+
+        Lx_base = Lx.copy()  # Lx without negated sum of rows on diagonal
         Lx_base_coo = Lx_base.tocoo(copy=False)
-        self.Lx_base_coo = Lx_base_coo
+        # L_diag_data_idxs = (Lx_base_coo.row == Lx_base_coo.col).nonzero()[0]
         self.L_diag_data_idxs = coo_diag_data_idxs(
             Lx_base.shape, Lx_base.data.shape, Lx_base_coo.row, Lx_base_coo.col
         )
-
-        # Conductance matrix containing geometry information only (x)
-        self.Lx = Lx_base.copy()
-        # self.Lx.data[self.L_diag_data_idxs] = -self.Lx_base[:dof].sum(axis=1).ravel()
-
-        self.L = Lx_base.copy()  # Conductance matrix
-        if matl._orthotropic_condy is not None:
-            raise ValueError("Orthotropic material is not supported in LP system!")
-        self.L.data = matl.condy_interp(init_temp) * Lx_base.data
-        # Placing the sum of the rows on the diagonal is only done for the inner
-        # conductances because the margin conductances are added to the film coefficient
-        # for temperature field computation.
-        self.L.data[self.L_diag_data_idxs] = -self.L[:dof].sum(axis=1).ravel()
+        Lx_base.data[self.L_diag_data_idxs] = 0.0
+        if temp_dependent:
+            if matl._orthotropic_condy is not None:
+                raise ValueError(
+                    "Temperature dependent orthotropic material is not supported!"
+                )
+            self.Lx_base = Lx_base
+            self.Lx_base_coo = Lx_base_coo
 
         self.surf_face_areas = surf_face_areas
         self.surf_to_marg_data_idxs = [

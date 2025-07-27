@@ -88,9 +88,8 @@ class FESystem:
 
         self.Mx_diag = Mx_diag
         self.M_diag = matl.vol_capy_interp(init_temp) * Mx_diag
-        self.Lx = (
-            Lx_x + Lx_y + Lx_z
-        )  # Geometry only; only needed for body properties with mean body temperature
+        # Geometry only; only needed for body properties with mean body temperature
+        self.Lx = Lx_x + Lx_y + Lx_z
         if matl._condy is not None:
             self.L = matl.condy_interp(init_temp) * self.Lx
         if matl._orthotropic_condy is not None:

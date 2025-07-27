@@ -289,9 +289,15 @@ class Solid:
         prop_name_str,
     ):
         prop = self.__dict__['_' + prop_name_str]
-        limits = (0.0, 100.0) if self.limits is None else self.limits
+        if prop is None:
+            return '    ' + prop_name_str + '=None,'
         if isinstance(prop, numbers.Real):
             return '    ' + prop_name_str + '=' + str('{0:0.3g}'.format(prop)) + ','
+        elif prop.ndim == 1:
+            line = '    ' + prop_name_str + '='
+            with printoptions(formatter={'float': lambda x: "{0:0.3g}".format(x)}):
+                line += repr(prop) + ','
+            return line
         else:
             temps = prop[0]
             vals = prop[1]
@@ -304,7 +310,7 @@ class Solid:
         lines[-1] += ','
         return '\n'.join(lines)
 
-    _prop_names = ['condy', 'dens', 'spec_heat']
+    _prop_names = ['condy', 'orthotropic_condy', 'dens', 'spec_heat']
 
     def __repr__(self):
         lines = []
